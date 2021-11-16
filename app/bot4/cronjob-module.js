@@ -31,6 +31,7 @@ var stopTime = new Date().getTime();
 var isLose = false;
 const MINUTE_LONGTIMEMILIS = 60 * 1000;
 var tempOrder = null;
+var isSentMessage = false;
 async function startBot() {
     let timeInfo = await getCronTimeInfo();
     const job = new cron.CronJob({

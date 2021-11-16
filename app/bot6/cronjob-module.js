@@ -29,6 +29,7 @@ var isStop = false;
 var stopTime = new Date().getTime();
 var isLose = false;
 var isLoseSecondTime = false;
+var isSentMessage = false;
 const MINUTE_LONGTIMEMILIS = 60 * 1000;
 var tempOrder = null;
 async function startBot() {

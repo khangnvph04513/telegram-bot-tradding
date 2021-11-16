@@ -322,15 +322,12 @@ function isValidLastResult(lastStatistics) {
     var createdDate = new Date(lastStatistics.created_time);
     var createdHour = createdDate.getHours();
     var createdMinute = createdDate.getMinutes();
-    console.log(result);
 
     if (currentHour !== createdHour) {
-        console.log("Không hợp lệ");
         return false;
     }
     console.log(currentMinute - createdMinute);
     if (currentMinute - createdMinute > 2) {
-        console.log("Không hợp lệ");
         return false;
     }
     return true;

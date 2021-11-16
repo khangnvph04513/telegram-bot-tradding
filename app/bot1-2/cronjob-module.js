@@ -138,6 +138,10 @@ async function startBot() {
                 if (!order) {
                     return;
                 }
+                if (parseInt(result.result) === DRAW) {
+                    sendToTelegram(groupIds, `Kết quả lượt vừa rồi : Hòa \u{1F4B0} \n\u{1F4B0}Số dư: ${budget}$ \n\u{1F4B0} Vốn: ${capital}$`);
+                    return;
+                }
                 // THẮNG
                 if (parseInt(result.result) === order.orders) {
                     var interest = orderPrice - orderPrice * 0.05;
