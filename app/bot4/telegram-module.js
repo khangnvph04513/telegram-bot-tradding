@@ -1,6 +1,6 @@
 const { Telegraf } = require('telegraf');
 
-const bot = new Telegraf('2064641820:AAHU5jo6GuBKnvZpptFgD9WUhtE76DL78sY');
+const bot = new Telegraf('2064641820:AAH_DbBnqk8wnfiMQbobDTaHW6ZDRS4ldU8');
 // 1988197681:AAHK5okW0zGFMV_3KlP1cwJRBRhoUK5D8Dk bot get id
 bot.command('getId', ctx => {
     bot.telegram.sendMessage(ctx.chat.id, "Id of Group or Channel is: " + ctx.chat.id, {})
