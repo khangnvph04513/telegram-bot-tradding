@@ -9,7 +9,7 @@ bot.command('getId', ctx => {
 bot.command('image', (ctx) => ctx.replyWithPhoto({ url: 'https://picsum.photos/200/300/?random' }));
 // Lấy telegram groupid bằng url
 // https://api.telegram.org/bot1988197681:AAHK5okW0zGFMV_3KlP1cwJRBRhoUK5D8Dk/getUpdates
-// https://api.telegram.org/bot1977842671:AAGJf6GW3pZ7SAaOu2oMeN7KHCJkUx8GGrM/getUpdates
+// https://api.telegram.org/bot1740325065:AAGNCtKTLmsYpkmQOG_HlU7TuDxHIxouGgg/getUpdates
 // Nếu bị dính lỗi Something went wrong, please try again hãy revoke lại bot
 
 bot.telegram.sendMessage(-1001546623891, "Bot re-start"); // Gửi tin nhắn 

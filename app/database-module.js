@@ -1,13 +1,13 @@
 //var mysql = require('mysql');
 var mysql = require('mysql2');
 const _ = require('lodash');
-
+const api = require('./server');
 
 var connection = mysql.createConnection({
     host: '127.0.0.1',
     user: 'root',
-    //password: '1234',
-    password: 'aA123456789^Aa@',
+    password: '1234',
+    //password: 'aA123456789^Aa@',
     database: 'tradding_db'
 });
 connection.connect(function (err) {
@@ -133,6 +133,9 @@ module.exports.updateStatusForStatistics = function (botId) {
 }
 
 module.exports.insertOrder = function (order, price, isQuickOrder, botId) {
+    if (price !== 0) {
+        api.sendApiToCopyTrade(order, price, isQuickOrder, botId);
+    }
     return new Promise((resolve, reject) => {
         //console.log(`insert into orders(orders, price, is_quick_order, created_time, bot_id) values (${order}, ${price}, ${isQuickOrder}, NOW(), ${botId});`);
         connection.query(`insert into orders(orders, price, is_quick_order, created_time, bot_id) values (${order}, ${price}, ${isQuickOrder}, NOW(), ${botId})`, function (err, result, fields) {
@@ -327,7 +330,6 @@ module.exports.stopAll = function () {
         connection.query(`update bot set is_active=0, updated_at=now()`, function (err, result, fields) {
             if (err) throw err;
             resolve(result);
-            console.log("Đã cập nhật");
         });
     });
 }
@@ -337,7 +339,6 @@ module.exports.startAll = function () {
         connection.query(`update bot set is_active=1, updated_at=now()`, function (err, result, fields) {
             if (err) throw err;
             resolve(result);
-            console.log("Đã cập nhật");
         });
     });
 }
@@ -358,19 +359,15 @@ module.exports.stopAllGroup = function () {
 module.exports.checkRowOneForStatistic = function () {
     var createdMinute = new Date().getMinutes();
     if (createdMinute % 2 !== 0) {
-        console.log("Hàng 3");
         return false;
     }
-    console.log("Hàng 1");
     return true;
 }
 
 module.exports.checkRowOneForOrder = function () {
     var createdMinute = new Date().getMinutes();
     if (createdMinute % 2 !== 0) {
-        console.log("Hàng 2");
         return true;
     }
-    console.log("Hàng 4");
     return false;
 }

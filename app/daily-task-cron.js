@@ -1,8 +1,6 @@
 const cron = require('cron');
 const database = require('./database-module');
-
-
-console.log(parseInt(101/10));
+var shell = require('shelljs');
 const job = new cron.CronJob({
     cronTime: '0 0 0 * * *',
     onTick: async function() {
@@ -16,6 +14,19 @@ const job = new cron.CronJob({
     timeZone: 'Asia/Ho_Chi_Minh' // Lưu ý set lại time zone cho đúng 
 });
 job.start();
+
+const jobRestart = new cron.CronJob({
+    cronTime: '0 0 0 * * *',
+    onTick: async function() {
+        shell.exec('pm2 restart tradding-data', function(code, output) {
+            console.log('Exit code:', code);
+            console.log('Program output:', output);
+          });
+    },
+    start: true,
+    timeZone: 'Asia/Ho_Chi_Minh' // Lưu ý set lại time zone cho đúng 
+});
+jobRestart.start();
 
 function sleep(ms) {
     return new Promise((resolve) => {

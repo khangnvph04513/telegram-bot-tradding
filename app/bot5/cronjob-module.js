@@ -85,10 +85,6 @@ async function startBot() {
                     isNotOrder = true;
                 }
                 if (!isNotOrder) {
-                    for (var i = 3; i > 0; i--) {
-                        await sleep(1000);
-                        sendToTelegram(groupIds, `Hãy đánh lệnh sau ${i} giây `);
-                    }
                     await sleep(1000);
                     sendToTelegram(groupIds, `Chờ kết quả \u{1F55D} !`);
                 }

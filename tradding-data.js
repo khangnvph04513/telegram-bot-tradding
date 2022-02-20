@@ -3,6 +3,10 @@ const puppeteer = require('puppeteer-extra');
 const database = require('./app/database-module');
 const cron = require('cron');
 var shell = require('shelljs');
+const readFileSync= require('fs'); 
+
+let capchaApi = JSON.parse(readFileSync.readFileSync('E:/Project/telegram-bot-tradding/capcha-api.json', 'utf-8'));
+//let capchaApi = JSON.parse(readFileSync.readFileSync('/home/capcha-api.json', 'utf-8'));
 
 const RecaptchaPlugin = require('puppeteer-extra-plugin-recaptcha');
 const { connect, ConsoleMessage } = require('puppeteer');
@@ -10,7 +14,7 @@ puppeteer.use(
     RecaptchaPlugin({
         provider: {
             id: '2captcha',
-            token: '5b638a2fc2e31bea140815d8eb9286e5' // REPLACE THIS WITH YOUR OWN 2CAPTCHA API KEY ⚡
+            token: capchaApi.apiKey // REPLACE THIS WITH YOUR OWN 2CAPTCHA API KEY ⚡
         },
         visualFeedback: true // colorize reCAPTCHAs (violet = detected, green = solved)
     })
@@ -28,10 +32,10 @@ puppeteer.launch({ headless: true, args: ['--no-sandbox'] }).then(async browser 
     const page = await browser.newPage()
     await page.setDefaultNavigationTimeout(0);
     await page.goto('https://moonata.net/login')
-    // await page.type('input[name="email"]', 'khangnvph045132@gmail.com', { delay: 100 })
-    // await page.type('input[name="password"]', '123@123Aa', { delay: 100 })
-    await page.type('input[name="email"]', 'trumikoran@gmail.com', { delay: 100 })
-    await page.type('input[name="password"]', 'Trung12345678', { delay: 100 })
+    await page.type('input[name="email"]', 'khangnvph045132@gmail.com', { delay: 100 })
+    await page.type('input[name="password"]', '123@123Aa', { delay: 100 })
+    // await page.type('input[name="email"]', 'trumikoran@gmail.com', { delay: 100 })
+    // await page.type('input[name="password"]', 'Trung12345678', { delay: 100 })
     await page.click('#main-content > div > div > div > div.boxAuthentication.show > div > div.formWapper.w-100 > form > div.form-group.text-center > button')
 
     // await page.goto('https://wefinex.net/login')
@@ -128,9 +132,8 @@ puppeteer.launch({ headless: true, args: ['--no-sandbox'] }).then(async browser 
                         shell.exec('pm2 restart app', function(code, output) {
                             console.log('Exit code:', code);
                             console.log('Program output:', output);
-                          });                        
+                          });
                     }
-
                 } else {
 
                 }

@@ -4,13 +4,6 @@ const bot = require('./telegram-module');
 const database = require('../database-module');
 var moment = require('moment');
 
-// var message = "\u{1F600} Cho bot gửi thử ký tự đặc biệt và xuống dòng \n \u{1F359} Cho bot gửi thử ký tự đặc biệt và xuống dòng \n \u{2B06} Cho bot gửi thử ký tự đặc biệt và xuống dòng \n \u{2B07} Cho bot gửi thử ký tự đặc biệt và xuống dòng \n"
-// message += "\u{1F55D} Đồng hồ, \u{2B06}  Tăng , \u{2B07} Giảm ,\u{1F389} Thắng , \u{274C} Thua , \u{267B} Thống kê, \u{1F4B0} Tiền";
-//bot.telegram.sendMessage(-516496456, message);
-// Link unicode của icon telegram : https://apps.timwhitlock.info/emoji/tables/unicode
-
-
-
 const botId = 8;
 const BOT_NAME = "Bot tín hiệu 4";
 const STOPPING_STATUS = 0;
@@ -59,7 +52,7 @@ async function startBot() {
             }
             let currentTimeSecond = new Date().getSeconds();
             if (currentTimeSecond === parseInt(timeInfo.orderSecond) || currentTimeSecond === (parseInt(timeInfo.orderSecond) + 1) || currentTimeSecond === (parseInt(timeInfo.orderSecond) + 2)) { // Vào lệnh
-                
+
                 var isNotOrder = false;
                 let lastStatistic = await getLastStatistics(botId);
                 const currrent = new Date().getTime();
@@ -85,40 +78,31 @@ async function startBot() {
                     isNotOrder = true;
                 }
                 if (!isNotOrder) {
-                    for (var i = 3; i > 0; i--) {
-                        await sleep(1000);
-                        sendToTelegram(groupIds, `Hãy đánh lệnh sau ${i} giây `);
-                    }
                     await sleep(1000);
                     sendToTelegram(groupIds, `Chờ kết quả \u{1F55D} !`);
                 }
             }
             if (currentTimeSecond === parseInt(timeInfo.resultSecond) || currentTimeSecond === (parseInt(timeInfo.resultSecond) + 1) || currentTimeSecond === (parseInt(timeInfo.resultSecond) + 2)) { // Update kết quả, Thống kê
                 var budget = dBbot.budget;
-                let order = await getOrder(botId);
-                if (!order) {
-                    insertOrder(0, 0, 0, botId);
-                    return;
-                }
                 if (isStop) {
                     insertToStatistics(botId, NOT_ORDER, 0, parseInt(result.result), 0);
                     let currrentTime = new Date().getTime();
-                    if ((currrentTime - stopTime) >= 1 * MINUTE_LONGTIMEMILIS) {
-                        console.log(`tempOrder ${tempOrder}`);
-                        console.log(`result ${result.result}`);
-                        //let statistics = await getStatisticByLimit(botId, 3);
-                        if (tempOrder === parseInt(result.result)) {
-                            sendToTelegram(groupIds, `SẴN SÀNG VÀO LỆNH!`);
-                            isStop = false;
-                            initSessionVolatility(botId);
-                            isLose = false;
-                        } else {
-                            console.log("Không đủ điều kiện đánh lệnh -> Đợi tiếp");
-                            stopTime = new Date().getTime();
-                        }
+                    console.log(`tempOrder ${tempOrder}`);
+                    console.log(`result ${result.result}`);
+                    //let statistics = await getStatisticByLimit(botId, 3);
+                    if (tempOrder === parseInt(result.result)) {
+                        sendToTelegram(groupIds, `SẴN SÀNG VÀO LỆNH!`);
+                        isStop = false;
+                        initSessionVolatility(botId);
+                        isLose = false;
                     } else {
-                        console.log("Đang chờ vào lệnh");
+                        console.log("Không đủ điều kiện đánh lệnh -> Đợi tiếp");
                     }
+                    return;
+                }
+                let order = await getOrder(botId);
+                if (!order) {
+                    insertOrder(0, 0, 0, botId);
                     return;
                 }
                 // THẮNG

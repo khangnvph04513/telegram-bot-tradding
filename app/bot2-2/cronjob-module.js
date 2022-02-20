@@ -21,16 +21,18 @@ const NOT_ORDER = "NOT_ORDER";
 const STATISTIC_TIME_AFTER = 10;
 const NON_QUICK_ORDER = 0;
 const QUICK_ORDER = 1;
+const QUICK_ORDER_TEMP = 2;
 const BUY = 0;
 const SELL = 1;
-const STOP_LOSS_VALUE = -7;
+//const STOP_LOSS_VALUE = -7;
+const STOP_LOSS_VALUE = -5;
 const TELEGRAM_CHANNEL_ID = -1001479979782; // kênh tín hiệu 2
 var isSentMessage = false;
 var orderPrice = 1;
 initSessionVolatility(botId);
 var isFirst = true;
 var isQuickOrder = NON_QUICK_ORDER;
-
+const MINUTE_LONGTIMEMILIS = 60 * 1000;
 async function startBot() {
     let timeInfo = await getCronTimeInfo();
     const job = new cron.CronJob({
@@ -72,7 +74,7 @@ async function startBot() {
                     return;
                 }
                 var isNotOrder = false;
-                if (isQuickOrder === NON_QUICK_ORDER) { // lệnh thường -> đánh theo hàng 1
+                if (isQuickOrder === NON_QUICK_ORDER || isQuickOrder === QUICK_ORDER_TEMP) {
                     if (lastStatistics.tradding_data === BUY) {
                         sendToTelegram(groupIds, `Hãy đánh ${orderPrice}$ lệnh Mua \u{2B06}`);
                         insertOrder(BUY, orderPrice, isQuickOrder, botId);
@@ -95,10 +97,6 @@ async function startBot() {
                     }
                 }
                 if (!isNotOrder) {
-                    for (var i = 3; i > 0; i--) {
-                        await sleep(1000);
-                        sendToTelegram(groupIds, `Hãy đánh lệnh sau ${i} giây `);
-                    }
                     await sleep(1000);
                     sendToTelegram(groupIds, `Chờ kết quả \u{1F55D} !`);
                 }
@@ -121,7 +119,7 @@ async function startBot() {
                     return;
                 }
                 // THẮNG
-                if (parseInt(result.result) === order.orders) {
+                if (false) { //parseInt(result.result) === order.orders
                     var interest = orderPrice - orderPrice * 0.05;
                     budget = roundNumber(budget + interest, 2);
                     var percentInterest = interest / capital * 100;
@@ -143,17 +141,18 @@ async function startBot() {
                     var percentInterest = interest / capital * 100;
                     sendToTelegram(groupIds, `Kết quả lượt vừa rồi : Thua \u{274C} \n\u{1F4B0}Số dư: ${budget}$ \n\u{1F4B0}Lãi : ${interest}$ (${percentInterest}%)\n\u{1F4B0}Vốn: ${capital}$`);
                     updateBugget(botId, budget);
-                    if (isQuickOrder === QUICK_ORDER && orderPrice === 4) {
+                    if (isQuickOrder === QUICK_ORDER && orderPrice === 2) {
                         insertToStatistics(botId, LOSE, QUICK_ORDER, parseInt(result.result), percentInterest);
-                    } else {
-                        insertToStatistics(botId, LOSE, NON_QUICK_ORDER, parseInt(result.result), percentInterest);
-                    }
-                    let volatility = dBbot.session_volatility + interest;
-                    isQuickOrder = QUICK_ORDER;
-                    if (volatility <= STOP_LOSS_VALUE && dBbot.is_running === RUNNING_STATUS) {
+                        orderPrice = 1;
+                        isQuickOrder = QUICK_ORDER_TEMP;
+                    } else if (isQuickOrder === QUICK_ORDER_TEMP) {
+                        await stopOrStartBot(botId, STOPPING_STATUS);
+                        sendToTelegram(groupIds, `Tạm dừng, chờ kết quả tiếp theo`);
                         orderPrice = 1;
                         isQuickOrder = NON_QUICK_ORDER;
-                        return;
+                    } else {
+                        insertToStatistics(botId, LOSE, NON_QUICK_ORDER, parseInt(result.result), percentInterest);
+                        isQuickOrder = QUICK_ORDER;
                     }
                     updateVolatiltyOfBot(botId, volatility);
                 }
@@ -241,7 +240,9 @@ async function getCronTimeInfo() {
     let cronTab = `${orderSecond.value},${resultSecond.value} * * * * *`;
     return {cronTab: cronTab, orderSecond: orderSecond.value, resultSecond: resultSecond.value}
 } 
-
+async function stopOrStartBot(botId, isRunning) {
+    return await database.stopOrStartBot(botId, isRunning);
+}
 function sleep(ms) {
     return new Promise((resolve) => {
         setTimeout(resolve, ms);

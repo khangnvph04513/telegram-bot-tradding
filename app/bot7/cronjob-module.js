@@ -4,12 +4,6 @@ const bot = require('./telegram-module');
 const database = require('../database-module');
 var moment = require('moment');
 
-
-// var message = "\u{1F600} Cho bot gửi thử ký tự đặc biệt và xuống dòng \n \u{1F359} Cho bot gửi thử ký tự đặc biệt và xuống dòng \n \u{2B06} Cho bot gửi thử ký tự đặc biệt và xuống dòng \n \u{2B07} Cho bot gửi thử ký tự đặc biệt và xuống dòng \n"
-// message += "\u{1F55D} Đồng hồ, \u{2B06}  Tăng , \u{2B07} Giảm ,\u{1F389} Thắng , \u{274C} Thua , \u{267B} Thống kê, \u{1F4B0} Tiền";
-//bot.telegram.sendMessage(-516496456, message);
-// Link unicode của icon telegram : https://apps.timwhitlock.info/emoji/tables/unicode
-
 //const TELEGRAM_CHANNEL_ID = -1001546623891; // group test
 
 const botId = 13;
@@ -84,10 +78,6 @@ async function startBot() {
                     isNotOrder = true;
                 }
                 if (!isNotOrder) {
-                    for (var i = 3; i > 0; i--) {
-                        await sleep(1000);
-                        sendToTelegram(groupIds, `Hãy đánh lệnh sau ${i} giây `);
-                    }
                     await sleep(1000);
                     sendToTelegram(groupIds, `Chờ kết quả \u{1F55D} !`);
                 }
@@ -95,10 +85,6 @@ async function startBot() {
 
             if (currentTimeSecond === parseInt(timeInfo.resultSecond) || currentTimeSecond === (parseInt(timeInfo.resultSecond) + 1) || (parseInt(timeInfo.resultSecond) + 2)) { // Update kết quả, Thống kê
                 var budget = dBbot.budget;
-                if (database.checkRowOneForStatistic()) {
-                    insertToStatistics(botId, NOT_ORDER, 0, parseInt(result.result), 0);
-                    return;
-                }
                 let order = await getOrder(botId);
                 if (!order) {
                     return;
@@ -119,6 +105,10 @@ async function startBot() {
                     } else {
                         console.log("Đang chờ vào lệnh");
                     }
+                    return;
+                }
+                if (database.checkRowOneForStatistic()) {
+                    insertToStatistics(botId, NOT_ORDER, 0, parseInt(result.result), 0);
                     return;
                 }
                 // THẮNG
