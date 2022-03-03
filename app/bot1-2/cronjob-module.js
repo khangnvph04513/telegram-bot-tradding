@@ -40,7 +40,6 @@ async function startBot() {
             let groupIds = await getGroupTelegramByBot(botId);
             if (!result) {
                 if (!isSentMessage) {
-                    console.log('BOT tạm ngưng do không lấy được dữ liệu');
                     sendToTelegram(groupIds, `BOT tạm ngưng do không lấy được dữ liệu`);
                     isSentMessage = true;
                 }
@@ -307,10 +306,8 @@ function formatDateFromISO(date) {
 function checkRowOneForOrder() {
     var createdMinute = new Date().getMinutes();
     if (createdMinute % 2 === 0) {
-        console.log("Hàng 1");
         return true;
     }
-    console.log("Hàng 3");
     return false;
 }
 
@@ -324,7 +321,6 @@ function isValidLastResult(lastStatistics) {
     console.log(result);
 
     if (currentHour !== createdHour) {
-        console.log("Không hợp lệ");
         return false;
     }
     console.log(currentMinute - createdMinute);

@@ -31,7 +31,7 @@ var isBetSession = true;
 puppeteer.launch({ headless: true, args: ['--no-sandbox'] }).then(async browser => {
     const page = await browser.newPage()
     await page.setDefaultNavigationTimeout(0);
-    await page.goto('https://moonata.net/login')
+    await page.goto('https://moonata1.net/login')
     await page.type('input[name="email"]', 'khangnvph045132@gmail.com', { delay: 100 })
     await page.type('input[name="password"]', '123@123Aa', { delay: 100 })
     // await page.type('input[name="email"]', 'trumikoran@gmail.com', { delay: 100 })
@@ -75,7 +75,6 @@ puppeteer.launch({ headless: true, args: ['--no-sandbox'] }).then(async browser 
         if (data.includes("SOCKET_BO_LAST_RESULT") && data.includes("finalSide")) {
             console.log(response.requestId)
             let str = response.response.payloadData;
-            console.log(str)
             if (id !== JSON.parse(str.substr(2, str.length))[1][0].id) {
                 count = 0;
                 id = JSON.parse(str.substr(2, str.length))[1][0].id;

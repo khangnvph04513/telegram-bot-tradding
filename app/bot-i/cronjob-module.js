@@ -51,7 +51,6 @@ async function startBot() {
             isSentMessage = false;
             var dBbot = await getBotInfo(botId);
             if (dBbot.is_active === 0) {
-                console.log("Bot dừng");
                 return;
             }
             lastStatistics = await getLastStatistics(botId);
@@ -111,7 +110,6 @@ async function startBot() {
                     if (isLose && isLoseSecondTime) {
                         isStop = true;
                         stopTime = new Date().getTime();
-                        console.log('Loss -> Stop');
                         if (orderType === BUY) {
                             orderType = SELL;
                         } else {

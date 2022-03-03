@@ -23,3 +23,15 @@ module.exports.sendApiToCopyTrade =  function (order, price, isQuickOrder, botId
       //console.log(error);
     });
 }
+
+const urlTradeVolume = "http://localhost:5555/api/trade/v1/volume-bet";
+module.exports.sendApiToTradeVolume =  function () {
+  axios
+    .post(urlTradeVolume)
+    .then(function (response) {
+      console.log(response);
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
+}

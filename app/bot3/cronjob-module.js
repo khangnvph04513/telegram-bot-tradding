@@ -235,8 +235,8 @@ function sleep(ms) {
         setTimeout(resolve, ms);
     });
 }
-async function getLastThreeDataTradding() {
-    return await database.getLastThreeDataTradding(3);
+async function getLastDataTraddingByLimit() {
+    return await database.getLastDataTraddingByLimit(3);
 }
 async function getBotInfo(botid) {
     return await database.getBotInfo(botid);
@@ -322,7 +322,7 @@ async function getLastOrder(botId) {
 }
 
 async function getData() {
-    let result = await getLastThreeDataTradding();
+    let result = await getLastDataTraddingByLimit();
     let currrent = new Date().getTime();
     if (!result || result.length < 3) {
         return null;

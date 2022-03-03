@@ -35,7 +35,7 @@ module.exports.getLastResult = function () {
     });
 }
 // Lấy 3 kết quả gần nhất
-module.exports.getLastThreeDataTradding = function (limit) {
+module.exports.getLastDataTraddingByLimit = function (limit) {
     return new Promise((resolve, reject) => {
         connection.query(`select * from tradding_data order by id desc limit ${limit}`, function (err, result, fields) {
             if (err) reject(err);
@@ -112,7 +112,6 @@ module.exports.statistic = function (botId, timeAfter) {
         connection.query(`select * from statistics where bot_id=${botId} and is_statistics=0  and result != 'NOT_ORDER' order by id desc limit ${timeAfter}`, function (err, result, fields) {
             if (err) reject(err);
             if (result.length >= timeAfter) {
-                console.log("Result: " + result.length);
                 resolve(result);
             } else {
                 console.log("Has Not data for statistics");
@@ -126,7 +125,6 @@ module.exports.updateStatusForStatistics = function (botId) {
     return new Promise((resolve, reject) => {
         connection.query(`update statistics set is_statistics=1 where bot_id=${botId} and is_statistics=0`, function (err, result, fields) {
             if (err) throw err;
-            console.log("UPDATE STATICS!");
             resolve(result);
         });
     });
@@ -167,10 +165,8 @@ module.exports.statisticDay = function (botId, timeAfter) {
             if (err) reject(err);
             let statisticTimeAfter = _.filter(result, ['is_statistics', 0]);
             if (statisticTimeAfter.length >= timeAfter) {
-                console.log("Result: " + result.length);
                 resolve(result);
             } else {
-                console.log("Has Not data for statistics Days");
             }
         });
     });
@@ -179,12 +175,10 @@ module.exports.statisticDay = function (botId, timeAfter) {
 
 module.exports.initSessionVolatility = function (botId) {
     return new Promise((resolve, reject) => {
-        console.log(`update bot set session_volatility=0 where id=${botId}`);
         return new Promise((resolve, reject) => {
             connection.query(`update bot set session_volatility=0, is_running=1 where id=${botId}`, function (err, result, fields) {
                 if (err) throw err;
                 resolve(result);
-                console.log("INIT SESSION VOLALITY");
             });
         });
     });
@@ -272,11 +266,9 @@ module.exports.clearData = function () {
 
 module.exports.initBot = function () {
     return new Promise((resolve, reject) => {
-        console.log(`Cập nhật cho bot`);
         connection.query(`update bot set is_running=1, updated_at=now(), session_volatility = 0, budget=100`, function (err, result, fields) {
             if (err) throw err;
             resolve(result);
-            console.log("Đã cập nhật");
         });
     });
 }
@@ -320,7 +312,6 @@ module.exports.insertSetting = function (key, value) {
     var sql = `INSERT INTO setting (config_key, value) VALUES ('${key}', '${value}')`;
     connection.query(sql, function (err, result) {
         if (err) throw err;
-        console.log("insert setting");
     });
 }
 
@@ -350,7 +341,6 @@ module.exports.stopAllGroup = function () {
         connection.query(`update users_group_bot set del_flg=1`, function (err, result, fields) {
             if (err) throw err;
             resolve(result);
-            console.log("Đã cập nhật");
         });
     });
 }

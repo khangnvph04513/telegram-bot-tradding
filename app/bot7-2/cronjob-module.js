@@ -307,7 +307,7 @@ async function updateVolatiltyOfBot(botId, volatility) {
 }
 
 async function getDataForOrder() {
-    let result = await getLastThreeDataTradding();
+    let result = await getLastDataTraddingByLimit();
     let currrent = new Date().getTime();
     if (!result || result.length < 4) {
         return null;
@@ -318,8 +318,8 @@ async function getDataForOrder() {
     return result[3];
 }
 
-async function getLastThreeDataTradding() {
-    return await database.getLastThreeDataTradding(4);
+async function getLastDataTraddingByLimit() {
+    return await database.getLastDataTraddingByLimit(4);
 }
 
 async function getLastDataTradding() {

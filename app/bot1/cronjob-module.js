@@ -74,7 +74,6 @@ async function startBot() {
                     return;
                 }
                 if (isQuickOrder === QUICK_ORDER) {
-                    console.log("lệnh gấp -> Vào luôn k chờ");
                 } else if (database.checkRowOneForOrder()) {
                     return;
                 }

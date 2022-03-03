@@ -9,7 +9,7 @@ var moment = require('moment');
 //bot.telegram.sendMessage(-516496456, message);
 // Link unicode của icon telegram : https://apps.timwhitlock.info/emoji/tables/unicode
 
-const botId = 6;
+const botId = 3;
 const BOT_NAME = "Bot tín hiệu 2.2";
 const RUNNING_STATUS = 1;
 const STOPPING_STATUS = 0;
@@ -24,9 +24,9 @@ const QUICK_ORDER = 1;
 const QUICK_ORDER_TEMP = 2;
 const BUY = 0;
 const SELL = 1;
-//const STOP_LOSS_VALUE = -7;
-const STOP_LOSS_VALUE = -5;
-const TELEGRAM_CHANNEL_ID = -1001479979782; // kênh tín hiệu 2
+const STOP_LOSS_VALUE = -3;
+const TELEGRAM_CHANNEL_ID = -1001595893591; // kênh tín hiệu 2.2
+//const TELEGRAM_CHANNEL_ID = -1001546623891; // group test
 var isSentMessage = false;
 var orderPrice = 1;
 initSessionVolatility(botId);
@@ -69,12 +69,12 @@ async function startBot() {
                     return;
                 }
                 if (isQuickOrder === QUICK_ORDER) {
-                } else if (!database.checkRowOneForOrder()) {
+                } else if (database.checkRowOneForOrder()) {
                     console.log("Lệnh thường -> Chờ kết quả hàng thứ ba -> Không làm gì cả");
                     return;
                 }
                 var isNotOrder = false;
-                if (isQuickOrder === NON_QUICK_ORDER || isQuickOrder === QUICK_ORDER_TEMP) {
+                if (isQuickOrder === NON_QUICK_ORDER || isQuickOrder === QUICK_ORDER_TEMP) { // lệnh thường -> đánh theo hàng 1
                     if (lastStatistics.tradding_data === BUY) {
                         sendToTelegram(groupIds, `Hãy đánh ${orderPrice}$ lệnh Mua \u{2B06}`);
                         insertOrder(BUY, orderPrice, isQuickOrder, botId);
@@ -104,22 +104,39 @@ async function startBot() {
     
             if (currentTimeSecond === parseInt(timeInfo.resultSecond) || currentTimeSecond === (parseInt(timeInfo.resultSecond) + 1) || currentTimeSecond === (parseInt(timeInfo.resultSecond) + 2)) { // Update kết quả, Thống kê
                 var budget = dBbot.budget;
-                if (!database.checkRowOneForStatistic() && isQuickOrder === NON_QUICK_ORDER) {
+
+                if (database.checkRowOneForStatistic() && isQuickOrder === NON_QUICK_ORDER) {
+                    insertToStatistics(botId, NOT_ORDER, 0, parseInt(result.result), 0);
+                    if (dBbot.is_running === STOPPING_STATUS) {
+                        let currrentTime = new Date().getTime();
+                        if (true) { // (currrentTime - new Date(dBbot.updated_at).getTime()) >= 1 * MINUTE_LONGTIMEMILIS
+                            let statistics = await getStatisticByLimit(botId, 3);
+                            if (await isReOrder(statistics)) {
+                                sendToTelegram(groupIds, `SẴN SÀNG VÀO LỆNH!`);
+                                stopOrStartBot(botId, RUNNING_STATUS);
+                                initSessionVolatility(botId);
+                            } else {
+                                console.log("Không đủ điều kiện đánh lệnh -> Đợi tiếp");
+                                stopOrStartBot(botId, STOPPING_STATUS);
+                            }
+                        } else {
+                            stopOrStartBot(botId, STOPPING_STATUS);
+                            console.log("Bot đang dừng -> Chỉ thống kê lệnh, không đánh");
+                        }
+                    }
+                    return;
+                }
+
+                if (database.checkRowOneForStatistic() && isQuickOrder === NON_QUICK_ORDER) {
                     insertToStatistics(botId, NOT_ORDER, 0, parseInt(result.result), 0);
                     return;
                 }
-                if (dBbot.is_running === STOPPING_STATUS) {
-                    console.log("Bot đang dừng -> Chỉ thống kê lệnh, không đánh");
-                    insertToStatistics(botId, NOT_ORDER, 0, parseInt(result.result), 0);
-                    return;
-                }
-    
                 let order = await getOrder(botId);
                 if (!order) {
                     return;
                 }
                 // THẮNG
-                if (false) { //parseInt(result.result) === order.orders
+                if (parseInt(result.result) === order.orders) {
                     var interest = orderPrice - orderPrice * 0.05;
                     budget = roundNumber(budget + interest, 2);
                     var percentInterest = interest / capital * 100;
@@ -154,6 +171,14 @@ async function startBot() {
                         insertToStatistics(botId, LOSE, NON_QUICK_ORDER, parseInt(result.result), percentInterest);
                         isQuickOrder = QUICK_ORDER;
                     }
+                    
+                    let volatility = dBbot.session_volatility + interest;
+                    // isQuickOrder = QUICK_ORDER;
+                    // if (volatility <= STOP_LOSS_VALUE && dBbot.is_running === RUNNING_STATUS) {
+                    //     orderPrice = 1;
+                    //     isQuickOrder = NON_QUICK_ORDER;
+                    //     return;
+                    // }
                     updateVolatiltyOfBot(botId, volatility);
                 }
     
@@ -232,6 +257,7 @@ startBot();
 
 
 
+
 async function getCronTimeInfo() {
     const ORDER_SETTING_TIME_KEY = "order.setting.second";
     const RESULT_SETTING_TIME_KEY = "result.setting.second";
@@ -240,9 +266,7 @@ async function getCronTimeInfo() {
     let cronTab = `${orderSecond.value},${resultSecond.value} * * * * *`;
     return {cronTab: cronTab, orderSecond: orderSecond.value, resultSecond: resultSecond.value}
 } 
-async function stopOrStartBot(botId, isRunning) {
-    return await database.stopOrStartBot(botId, isRunning);
-}
+
 function sleep(ms) {
     return new Promise((resolve) => {
         setTimeout(resolve, ms);
@@ -352,6 +376,9 @@ async function updateVolatiltyOfBot(botId, volatility) {
     return await database.updateVolatiltyOfBot(botId, volatility);
 }
 
+async function stopOrStartBot(botId, isRunning) {
+    return await database.stopOrStartBot(botId, isRunning);
+}
 
 async function getStatisticByLimit(botId, limit) {
     return await database.getStatisticByLimit(botId, limit);
@@ -375,6 +402,25 @@ async function getLastDataTradding() {
 
 async function getGroupTelegramByBot(botId) {
     return await database.getGroupTelegramByBot(botId);
+}
+
+async function isReOrder(statistics) {
+
+    if (statistics[2].tradding_data === BUY && statistics[1].tradding_data === BUY) {
+        return true;
+    }
+    if (statistics[2].tradding_data === SELL && statistics[1].tradding_data === SELL) {
+        return true;
+    }
+
+    if (statistics[2].tradding_data === BUY && statistics[1].tradding_data === SELL && statistics[0].tradding_data === BUY) {
+        return true;
+    }
+
+    if (statistics[2].tradding_data === SELL && statistics[1].tradding_data === BUY && statistics[0].tradding_data === SELL) {
+        return true;
+    }
+    return false;
 }
 
 async function sendToTelegram(groupIds, message) {
