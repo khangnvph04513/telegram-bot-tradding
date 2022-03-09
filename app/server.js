@@ -29,9 +29,9 @@ module.exports.sendApiToTradeVolume =  function () {
   axios
     .post(urlTradeVolume)
     .then(function (response) {
-      console.log(response);
+      
     })
     .catch(function (error) {
-      console.log(error);
+      
     });
 }

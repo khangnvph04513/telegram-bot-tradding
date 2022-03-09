@@ -1,7 +1,6 @@
 const cron = require('cron');
 const bot = require('./telegram-module');
-//const bot = require('../telegram-test2'); // k push
-const database = require('../database-module');
+const database = require('../../database-module');
 var moment = require('moment');
 
 // var message = "\u{1F600} Cho bot gửi thử ký tự đặc biệt và xuống dòng \n \u{1F359} Cho bot gửi thử ký tự đặc biệt và xuống dòng \n \u{2B06} Cho bot gửi thử ký tự đặc biệt và xuống dòng \n \u{2B07} Cho bot gửi thử ký tự đặc biệt và xuống dòng \n"
@@ -18,20 +17,18 @@ const capital = 100;
 const WIN = "WIN";
 const LOSE = "LOSE";
 const NOT_ORDER = "NOT_ORDER";
-const STATISTIC_TIME_AFTER = 10;
 const NON_QUICK_ORDER = 0;
 const QUICK_ORDER = 1;
 const BUY = 0;
 const SELL = 1;
 const DRAW = 2;
-const STOP_LOSS_VALUE = -3;
 const MINUTE_LONGTIMEMILIS = 60 * 1000;
-const TELEGRAM_CHANNEL_ID = -1001546623891; // kênh tín hiệu 1
+const TELEGRAM_CHANNEL_ID = -1001676917509;
 var isSentMessage = false;
 initSessionVolatility(botId);
 startAll();
 var isFirst = true;
-
+let isQuickOrder = NON_QUICK_ORDER;
 async function startBot() {
     let timeInfo = await getCronTimeInfo();
     const job = new cron.CronJob({
@@ -48,7 +45,10 @@ async function startBot() {
                 }
                 return;
             }
-            isSentMessage = false;
+            if (isSentMessage) {
+                isSentMessage = false;
+                return;
+            }
             var dBbot = await getBotInfo(botId);
             if (dBbot.is_active === 0) {
                 console.log("Bot dừng");
@@ -60,35 +60,37 @@ async function startBot() {
                 insertToStatistics(botId, NOT_ORDER, 0, 0, 0);
                 return;
             }
-            // lệnh gấp
-            let isQuickOrder = NON_QUICK_ORDER;
-            if (lastStatistics.result === LOSE && !isFirst) {
-                isQuickOrder = QUICK_ORDER;
-                orderPrice = 2
-            }
             let currentTimeSecond = new Date().getSeconds();
 
             isFirst = false;
             if (currentTimeSecond === parseInt(timeInfo.orderSecond) || currentTimeSecond === (parseInt(timeInfo.orderSecond) + 1) || currentTimeSecond === (parseInt(timeInfo.orderSecond) + 2)) { // Vào lệnh
                 if (dBbot.is_running === STOPPING_STATUS) {
-                    console.log("Bot dừng");
-                    return;
+                    let currrentTime = new Date().getTime();
+                    let isReOrder = await isReOrder2();
+                    if (database.checkRowOneForOrder() && isReOrder) {
+                        console.log("Đủ điều kiện đánh tiếp");
+                        sendToTelegram(groupIds, `SẴN SÀNG VÀO LỆNH`);
+                        stopOrStartBot(botId, RUNNING_STATUS);
+                    } else {
+                        console.log("Chưa đủ điều kiện đánh tiếp");
+                        return;
+                    }
+
                 }
-                if (database.checkRowOneForOrder()) {
+                if (!database.checkRowOneForOrder()) {
                     console.log("Hàng 1-> Chờ");
                     return;
                 }
                 var isNotOrder = false;
-                if (isQuickOrder === NON_QUICK_ORDER) { // lệnh thường -> đánh theo hàng 1
-                    if (lastStatistics.tradding_data === BUY) {
-                        sendToTelegram(groupIds, `Hãy đánh ${orderPrice}$ lệnh Mua \u{2B06}`);
-                        insertOrder(BUY, orderPrice, isQuickOrder, botId);
-                    } else if (lastStatistics.tradding_data === SELL) {
-                        sendToTelegram(groupIds, `Hãy đánh ${orderPrice}$ lệnh Bán \u{2B07}`);
-                        insertOrder(SELL, orderPrice, isQuickOrder, botId);
-                    } else {
-                        isNotOrder = true;
-                    }
+                let data = await getOrder4FirstRow();
+                if (parseInt(data.result) === BUY) {
+                    sendToTelegram(groupIds, `Hãy đánh ${orderPrice}$ lệnh Mua \u{2B06}`);
+                    insertOrder(BUY, orderPrice, isQuickOrder, botId);
+                } else if (parseInt(data.result) === SELL) {
+                    sendToTelegram(groupIds, `Hãy đánh ${orderPrice}$ lệnh Bán \u{2B07}`);
+                    insertOrder(SELL, orderPrice, isQuickOrder, botId);
+                } else {
+                    isNotOrder = true;
                 }
                 if (!isNotOrder) {
                     await sleep(1000);
@@ -129,7 +131,9 @@ async function startBot() {
                     sendToTelegram(groupIds, `Kết quả lượt vừa rồi : Thua \u{274C} \n\u{1F4B0}Số dư: ${budget}$ \n\u{1F4B0}Lãi : ${interest}$ (${percentInterest}%)\n\u{1F4B0}Vốn: ${capital}$`);
                     updateBugget(botId, budget);
                     insertToStatistics(botId, LOSE, isQuickOrder, parseInt(result.result), percentInterest);
-                    if (isQuickOrder === QUICK_ORDER) {
+                    if (isQuickOrder === NON_QUICK_ORDER) {
+                        isQuickOrder = QUICK_ORDER;
+                    } else if (isQuickOrder === QUICK_ORDER) {
                         await stopOrStartBot(botId, STOPPING_STATUS);
                         sendToTelegram(groupIds, `Tạm dừng, chờ kết quả tiếp theo`);
                         isQuickOrder = NON_QUICK_ORDER;
@@ -146,6 +150,31 @@ async function startBot() {
 
 startBot();
 
+async function getLastDataTraddingByLimit(limit) {
+    return await database.getLastDataTraddingByLimit(limit);
+}
+
+async function getOrder4FirstRow() {
+    let data = await getLastDataTraddingByLimit(2);
+    if (data.length < 2) {
+        return false;
+    }
+    console.log(data);
+    return data[0];
+}
+
+async function isReOrder2() {
+    let data = await getLastDataTraddingByLimit(5);
+    if (data.length < 5) {
+        return 0;
+    }
+    console.log(data);
+    if (data[2].result === data[4].result) {
+        return true;
+    }
+    return false;
+
+}
 
 async function getCronTimeInfo() {
     const ORDER_SETTING_TIME_KEY = "order.setting.second";

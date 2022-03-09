@@ -26,7 +26,7 @@ const BUY = 0;
 const SELL = 1;
 const STOP_LOSS_VALUE = -5;
 //const TELEGRAM_CHANNEL_ID = -1001546623891;
-const TELEGRAM_CHANNEL_ID = -677336118;
+const TELEGRAM_CHANNEL_ID = -1001752608927;
 var isSentMessage = false;
 var orderPrice = 1;
 initSessionVolatility(botId);
@@ -49,7 +49,11 @@ async function startBot() {
                 }
                 return;
             }
-            isSentMessage = false;
+            if (isSentMessage) {
+                isSentMessage = false;
+                return;
+            }
+            
             var dBbot = await getBotInfo(botId);
             if (dBbot.is_active === 0) {
                 console.log("TEST 3");
@@ -72,7 +76,7 @@ async function startBot() {
                     console.log("TEST 5");
                     let currrentTime = new Date().getTime();
                     let isReOrder = await isReOrder2();
-                    if (database.checkRowOneForOrder() && isReOrder) {
+                    if (!database.checkRowOneForOrder() && isReOrder) {
                         console.log("Đủ điều kiện đánh tiếp");
                         sendToTelegram(groupIds, `SẴN SÀNG VÀO LỆNH`);
                         stopOrStartBot(botId, RUNNING_STATUS);
@@ -82,18 +86,16 @@ async function startBot() {
                     }
                     
                 }
-                if (isQuickOrder === NON_QUICK_ORDER && !database.checkRowOneForOrder()) {
+                if (isQuickOrder === NON_QUICK_ORDER && database.checkRowOneForOrder()) {
                     console.log("TEST 6");
-                    console.log("Lệnh thường -> Chờ kết quả hàng thứ ba -> Không làm gì cả");
+                    console.log("Lệnh thường -> Chờ kết quả hàng thứ 2 -> Không làm gì cả");
                     return;
                 }
 
                 var isNotOrder = false;
                 console.log(`isQuickOrder ${isQuickOrder}`);
-                if (isQuickOrder === NON_QUICK_ORDER || database.checkRowOneForOrder()) {
-                    let data = await getOrderForFirstRow();
-                    console.log("ORDDER");
-                    console.log(data);
+                if (isQuickOrder === NON_QUICK_ORDER || !database.checkRowOneForOrder()) {
+                    let data = await getOrderForThirdRow();
                     if (parseInt(data.result) === BUY) {
                         sendToTelegram(groupIds, `Hãy đánh ${orderPrice}$ lệnh Mua \u{2B06}`);
                         insertOrder(BUY, orderPrice, isQuickOrder, botId);
@@ -103,14 +105,12 @@ async function startBot() {
                     } else {
                         isNotOrder = true;
                     }
-                } else if (!database.checkRowOneForOrder() && isQuickOrder !== NON_QUICK_ORDER) {
-                    let lastOrder = await getLastOrder(botId);
-                    console.log("LAST");
-                    console.log(lastOrder);
-                    if (lastOrder.orders === BUY) {
+                } else if (database.checkRowOneForOrder() && isQuickOrder !== NON_QUICK_ORDER) {
+                    let data = await getOrder4FirstRow();
+                    if (parseInt(data.result) === BUY) {
                         sendToTelegram(groupIds, `Hãy đánh ${orderPrice}$ lệnh Mua \u{2B06}`);
                         insertOrder(BUY, orderPrice, isQuickOrder, botId);
-                    } else if (lastOrder.orders === SELL) {
+                    } else if (parseInt(data.result) === SELL) {
                         sendToTelegram(groupIds, `Hãy đánh ${orderPrice}$ lệnh Bán \u{2B07}`);
                         insertOrder(SELL, orderPrice, isQuickOrder, botId);
                     } else {
@@ -125,7 +125,7 @@ async function startBot() {
 
             if (currentTimeSecond === parseInt(timeInfo.resultSecond) || currentTimeSecond === (parseInt(timeInfo.resultSecond) + 1) || currentTimeSecond === (parseInt(timeInfo.resultSecond) + 2)) { // Update kết quả, Thống kê
                 var budget = dBbot.budget;
-                if (!database.checkRowOneForStatistic() && isQuickOrder === NON_QUICK_ORDER) {
+                if (database.checkRowOneForStatistic() && isQuickOrder === NON_QUICK_ORDER) {
                     insertToStatistics(botId, NOT_ORDER, 0, parseInt(result.result), 0);
                     if (dBbot.is_running === STOPPING_STATUS) {
                         return;
@@ -192,7 +192,16 @@ async function getLastDataTraddingByLimit(limit) {
     return await database.getLastDataTraddingByLimit(limit);
 }
 
-async function getOrderForFirstRow() {
+async function getOrderForThirdRow() {
+    let data = await getLastDataTraddingByLimit(2);
+    if (data.length < 2) {
+        return false;
+    }
+    console.log(data);
+    return data[1];
+}
+
+async function getOrder4FirstRow() {
     let data = await getLastDataTraddingByLimit(4);
     if (data.length < 4) {
         return false;
@@ -202,14 +211,14 @@ async function getOrderForFirstRow() {
 }
 
 async function isReOrder2() {
-    let data = await getLastDataTraddingByLimit(8);
-    if (data.length < 8) {
+    let data = await getLastDataTraddingByLimit(6);
+    if (data.length < 6) {
         return 0;
     }
+    console.log(data[0]);
     console.log(data[2]);
-    console.log(data[4]);
-    console.log(data[7]);
-    if (data[7].result === data[2].result || data[7].result === data[4].result) {
+    console.log(data[5]);
+    if (data[5].result === data[0].result || data[5].result === data[2].result) {
         return true;
     }
     return false;

@@ -1,15 +1,19 @@
 const { Telegraf } = require('telegraf');
 
-const bot = new Telegraf('1678619895:AAGuX9xOeX0SqUhGWw5KF6L4vt6ZkzggsZc'); // tradding-bot
-bot.command('start', ctx => {
-    console.log(ctx.from)
-    bot.telegram.sendMessage(ctx.chat.id, 'hello there! Welcome to my new telegram bot.', {})
+const bot = new Telegraf('5235384504:AAFrlvkJDTaRh5054Qgg4BAQEtkdWfaXPXY'); // tradding_4341_bot
+// 1988197681:AAHK5okW0zGFMV_3KlP1cwJRBRhoUK5D8Dk bot get id
+bot.command('getId', ctx => {
+    bot.telegram.sendMessage(ctx.chat.id, "Id of Group or Channel is: " + ctx.chat.id, {})
 });
 
 bot.command('image', (ctx) => ctx.replyWithPhoto({ url: 'https://picsum.photos/200/300/?random' }));
 // Lấy telegram groupid bằng url
-// https://api.telegram.org/bot1740325065:AAEixtBO5zu__F5S44iiG-tkP-DuBoTUpiY/getUpdates
-bot.telegram.sendMessage(-1001492649224, "Bot tiến hành khởi động lại. Nhận tín hiệu từ Bot tín hiệu 1"); // Gửi tin nhắn
+// https://api.telegram.org/bot1988197681:AAHK5okW0zGFMV_3KlP1cwJRBRhoUK5D8Dk/getUpdates
+// https://api.telegram.org/bot5235384504:AAFrlvkJDTaRh5054Qgg4BAQEtkdWfaXPXY/getUpdates
+// Nếu bị dính lỗi Something went wrong, please try again hãy revoke lại bot
+
+bot.telegram.sendMessage(-1001676917509, "Chào mừng đến với Phương Pháp Bóng rơi"); // Gửi tin nhắn 
+bot.launch();
 module.exports = bot;
 
 
