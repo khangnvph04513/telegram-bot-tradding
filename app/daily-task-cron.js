@@ -42,6 +42,20 @@ async function startTradeVolume() {
 }
 startTradeVolume();
 
+async function medthodChecking() {
+    let timeInfo = await getTimeStatisticsInfo();
+    const botConfigCron = new cron.CronJob({
+        cronTime: timeInfo.cronTab,
+        onTick: async function () {
+            let currentTimeSecond = new Date().getSeconds();
+            console.log("start");
+            api.sendApiBotSetting();
+        }
+    });
+    botConfigCron.start();
+}
+medthodChecking();
+
 
 function sleep(ms) {
     return new Promise((resolve) => {
@@ -72,5 +86,19 @@ async function getCronTimeInfo() {
     let cronTab = `${orderSecond.value} * * * * *`;
     return {cronTab: cronTab, orderSecond: orderSecond.value, resultSecond: resultSecond.value}
 }
+
+async function getTimeStatisticsInfo() {
+    const ORDER_SETTING_TIME_KEY = "order.setting.second";
+    const RESULT_SETTING_TIME_KEY = "result.setting.second";
+    let orderSecond = await database.getSettingByKey(ORDER_SETTING_TIME_KEY);
+    let resultSecond = await database.getSettingByKey(RESULT_SETTING_TIME_KEY);
+    let time4Check = resultSecond.value;
+    if (time4Check > 60) {
+        time4Check = time4Check -60;
+    }
+    let cronTab = `${time4Check} * * * * *`;
+    return {cronTab: cronTab, orderSecond: orderSecond.value, resultSecond: resultSecond.value}
+}
+
 
 module.exports = job;

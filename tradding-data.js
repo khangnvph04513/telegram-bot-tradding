@@ -3,10 +3,10 @@ const puppeteer = require('puppeteer-extra');
 const database = require('./app/database-module');
 const cron = require('cron');
 var shell = require('shelljs');
-const readFileSync= require('fs'); 
+const readFileSync = require('fs');
 
-//let capchaApi = JSON.parse(readFileSync.readFileSync('E:/Project/telegram-bot-tradding/capcha-api.json', 'utf-8'));
-let capchaApi = JSON.parse(readFileSync.readFileSync('/home/capcha-api.json', 'utf-8'));
+let capchaApi = JSON.parse(readFileSync.readFileSync('E:/Project/telegram-bot-tradding/capcha-api.json', 'utf-8'));
+//let capchaApi = JSON.parse(readFileSync.readFileSync('/home/capcha-api.json', 'utf-8'));
 
 const RecaptchaPlugin = require('puppeteer-extra-plugin-recaptcha');
 const { connect, ConsoleMessage } = require('puppeteer');
@@ -31,11 +31,11 @@ var isBetSession = true;
 puppeteer.launch({ headless: true, args: ['--no-sandbox'] }).then(async browser => {
     const page = await browser.newPage()
     await page.setDefaultNavigationTimeout(0);
-    await page.goto('https://moonata2.net/login')
-    await page.type('input[name="email"]', 'khangnvph045132@gmail.com', { delay: 100 })
-    await page.type('input[name="password"]', '123@123Aa', { delay: 100 })
-    // await page.type('input[name="email"]', 'trumikoran@gmail.com', { delay: 100 })
-    // await page.type('input[name="password"]', 'Trung12345678', { delay: 100 })
+    await page.goto('https://bitiva1.net/login')
+    await page.type('input[name="email"]', 'gunh39683@gmail.com', { delay: 100 })
+    await page.type('input[name="password"]', '123456', { delay: 100 })
+    // await page.type('input[name="email"]', 'khangnvph045132@gmail.com', { delay: 100 })
+    // await page.type('input[name="password"]', '123@123Aa', { delay: 100 })
     await page.click('#main-content > div > div > div > div.boxAuthentication.show > div > div.formWapper.w-100 > form > div.form-group.text-center > button')
 
     // That's it, a single line of code to solve reCAPTCHAs 🎉
@@ -91,47 +91,47 @@ puppeteer.launch({ headless: true, args: ['--no-sandbox'] }).then(async browser 
                 }
                 await database.inserRessult(lastResult);
                 if (isBetSession) {
+                    let isRestart = false;
                     let currentTimeSecond = new Date().getSeconds();
                     let newResultTiming = currentTimeSecond + BUFFER_TIMING;
                     let oldResultTiming = await database.getSettingByKey(RESULT_SETTING_TIME_KEY);
                     console.log(`currentTimeSecond ${currentTimeSecond}`);
                     console.log(`newResultTiming ${newResultTiming}`);
-
-                    if (Math.abs(parseInt(oldResultTiming.value) - newResultTiming) > 2) {
-                        if (newResultTiming > 60) {
-                            newResultTiming = newResultTiming - 60;
-                        }
+                    if (newResultTiming > 60) {
+                        newResultTiming = newResultTiming - 60;
+                    }
+                    if (Math.abs(parseInt(oldResultTiming.value) - newResultTiming) > 5) {
                         await database.stopAll();
                         await database.stopAllGroup();
                         await database.updateSetting(RESULT_SETTING_TIME_KEY, newResultTiming);
                         console.log("pm2 restart app");
                         await sleep(1000);
-                        shell.exec('pm2 restart app', function(code, output) {
-                            console.log('Exit code:', code);
-                            console.log('Program output:', output);
-                          });                        
+                        isRestart = true;
                     }
                     //let currentTimeSecond = new Date().getSeconds();
                     let newOrderTiming = currentTimeSecond + ORDER_DELAY_TIMING;
                     let oldOrderTiming = await database.getSettingByKey(ORDER_SETTING_TIME_KEY);
                     console.log(`currentTimeSecond ${currentTimeSecond}`);
                     console.log(`newOrderTiming ${newOrderTiming}`);
-                    if (Math.abs(parseInt(oldOrderTiming.value) - newOrderTiming) > 2) {
-                        if (newOrderTiming > 60) {
-                            newOrderTiming = newOrderTiming - 60;
-                        }
+                    if (newOrderTiming > 60) {
+                        newOrderTiming = newOrderTiming - 60;
+                    }
+                    if (Math.abs(parseInt(oldOrderTiming.value) - newOrderTiming) > 5) {
                         await database.stopAll();
                         await database.stopAllGroup();
                         await database.updateSetting(ORDER_SETTING_TIME_KEY, newOrderTiming);
                         await sleep(1000);
-                        shell.exec('pm2 restart app', function(code, output) {
+                        isRestart = true;
+                    }
+                    if (isRestart) {
+                        shell.exec('pm2 restart app', function (code, output) {
                             console.log('Exit code:', code);
                             console.log('Program output:', output);
-                          });
+                        });
+                        isRestart = false;
                     }
-                } else {
-
                 }
+
             }
         }
         if (data === "3") {

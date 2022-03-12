@@ -38,7 +38,6 @@ async function startBot() {
             let groupIds = await getGroupTelegramByBot(botId);
             if (!results) {
                 if (!isSentMessage) {
-                    console.log('BOT tạm ngưng do không lấy được dữ liệu');
                     sendToTelegram(groupIds, `BOT tạm ngưng do không lấy được dữ liệu`);
                     isSentMessage = true;
                 }
@@ -47,7 +46,6 @@ async function startBot() {
             isSentMessage = false;
             var dBbot = await getBotInfo(botId);
             if (dBbot.is_active === 0) {
-                console.log("Bot dừng");
                 return;
             }
             var orderPrice = 1;
@@ -66,15 +64,12 @@ async function startBot() {
             isFirst = false;
             if (currentTimeSecond === parseInt(timeInfo.orderSecond) || currentTimeSecond === (parseInt(timeInfo.orderSecond) + 1) || currentTimeSecond === (parseInt(timeInfo.orderSecond) + 2)) { // Vào lệnh
                 if (dBbot.is_running === STOPPING_STATUS) {
-                    console.log("Bot đang dừng, không đánh");
                     return;
                 }
                 let orderCondition = await getOrderCondition(results);
                 
                 if (isQuickOrder === QUICK_ORDER) {
-                    console.log("lệnh gấp -> Vào luôn k chờ");
                 } else if (!database.checkRowOneForOrder()) {
-                    console.log("Lệnh thường -> Chờ kết quả hàng thứ ba -> Không làm gì cả");
                     return;
                 }
                 
@@ -104,12 +99,11 @@ async function startBot() {
     
             if (currentTimeSecond === parseInt(timeInfo.resultSecond) || currentTimeSecond === (parseInt(timeInfo.resultSecond) + 1) || currentTimeSecond === (parseInt(timeInfo.resultSecond) + 2)) { // Update kết quả, Thống kê
                 var budget = dBbot.budget;
-                if (!database.checkRowOneForStatistic() && isQuickOrder === NON_QUICK_ORDER) {
+                if (database.checkRowOneForStatistic() && isQuickOrder === NON_QUICK_ORDER) {
                     insertToStatistics(botId, NOT_ORDER, 0, parseInt(results[0].result), 0);
                     return;
                 }
                 if (dBbot.is_running === STOPPING_STATUS) {
-                    console.log("Bot đang dừng -> Chỉ thống kê lệnh, không đánh");
                     insertToStatistics(botId, NOT_ORDER, 0, parseInt(results[0].result), 0);
                     return;
                 }

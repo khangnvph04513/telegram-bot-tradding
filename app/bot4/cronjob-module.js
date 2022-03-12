@@ -87,8 +87,6 @@ async function startBot() {
                 if (isStop) {
                     insertToStatistics(botId, NOT_ORDER, 0, parseInt(result.result), 0);
                     let currrentTime = new Date().getTime();
-                    console.log(`tempOrder ${tempOrder}`);
-                    console.log(`result ${result.result}`);
                     //let statistics = await getStatisticByLimit(botId, 3);
                     if (tempOrder === parseInt(result.result)) {
                         sendToTelegram(groupIds, `SẴN SÀNG VÀO LỆNH!`);

@@ -49,7 +49,6 @@ async function startBot() {
             isSentMessage = false;
             var dBbot = await getBotInfo(botId);
             if (dBbot.is_active === 0) {
-                console.log("Bot dừng");
                 return;
             }
             lastStatistics = await getLastStatistics(botId);
@@ -102,7 +101,6 @@ async function startBot() {
                             initSessionVolatility(botId);
                             isLose = false;
                         } else {
-                            console.log("Không đủ điều kiện đánh lệnh -> Đợi tiếp");
                         }
                     return;
                 }

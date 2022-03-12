@@ -36,6 +36,7 @@ async function startBot() {
     const job = new cron.CronJob({
         cronTime: timeInfo.cronTab,
         onTick: async function () {
+            
             let result = await getLastDataTradding();
             let groupIds = await getGroupTelegramByBot(botId);
             if (!result) {
@@ -48,7 +49,6 @@ async function startBot() {
             isSentMessage = false;
             var dBbot = await getBotInfo(botId);
             if (dBbot.is_active === 0) {
-                console.log("Bot dừng");
                 return;
             }
             var orderPrice = 1;
@@ -70,7 +70,7 @@ async function startBot() {
                     return;
                 }
                 if (isQuickOrder === QUICK_ORDER) {
-                } else if (!database.checkRowOneForOrder()) {
+                } else if (database.checkRowOneForOrder()) {
                     return;
                 }
                 var isNotOrder = false;
@@ -115,12 +115,10 @@ async function startBot() {
                                 stopOrStartBot(botId, RUNNING_STATUS);
                                 initSessionVolatility(botId);
                             } else {
-                                console.log("Không đủ điều kiện đánh lệnh -> Đợi tiếp");
                                 stopOrStartBot(botId, STOPPING_STATUS);
                             }
                         } else {
                             stopOrStartBot(botId, STOPPING_STATUS);
-                            console.log("Bot đang dừng -> Chỉ thống kê lệnh, không đánh");
                         }
                     }
                     return;
@@ -156,7 +154,6 @@ async function startBot() {
                     insertToStatistics(botId, LOSE, isQuickOrder, parseInt(result.result), percentInterest);
                     let volatility = dBbot.session_volatility + interest;
                     if (volatility <= STOP_LOSS_VALUE && dBbot.is_running === RUNNING_STATUS) {
-                        console.log("Dừng bot");
                         await stopOrStartBot(botId, STOPPING_STATUS);
                         sendToTelegram(groupIds, `Tạm dừng, chờ kết quả tiếp theo`);
                         return;

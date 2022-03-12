@@ -50,7 +50,6 @@ async function startBot() {
             isSentMessage = false;
             var dBbot = await getBotInfo(botId);
             if (dBbot.is_active === 0) {
-                console.log("Bot dừng");
                 return;
             }
             lastStatistics = await getLastStatistics(botId);
@@ -70,7 +69,6 @@ async function startBot() {
                 }
                 if (isQuickOrder === QUICK_ORDER) {
                 } else if (database.checkRowOneForOrder()) {
-                    console.log("Lệnh thường -> Chờ kết quả hàng thứ ba -> Không làm gì cả");
                     return;
                 }
                 var isNotOrder = false;
@@ -105,7 +103,7 @@ async function startBot() {
             if (currentTimeSecond === parseInt(timeInfo.resultSecond) || currentTimeSecond === (parseInt(timeInfo.resultSecond) + 1) || currentTimeSecond === (parseInt(timeInfo.resultSecond) + 2)) { // Update kết quả, Thống kê
                 var budget = dBbot.budget;
 
-                if (database.checkRowOneForStatistic() && isQuickOrder === NON_QUICK_ORDER) {
+                if (!database.checkRowOneForStatistic() && isQuickOrder === NON_QUICK_ORDER) {
                     insertToStatistics(botId, NOT_ORDER, 0, parseInt(result.result), 0);
                     if (dBbot.is_running === STOPPING_STATUS) {
                         let currrentTime = new Date().getTime();
@@ -116,21 +114,15 @@ async function startBot() {
                                 stopOrStartBot(botId, RUNNING_STATUS);
                                 initSessionVolatility(botId);
                             } else {
-                                console.log("Không đủ điều kiện đánh lệnh -> Đợi tiếp");
                                 stopOrStartBot(botId, STOPPING_STATUS);
                             }
                         } else {
                             stopOrStartBot(botId, STOPPING_STATUS);
-                            console.log("Bot đang dừng -> Chỉ thống kê lệnh, không đánh");
                         }
                     }
                     return;
                 }
 
-                if (database.checkRowOneForStatistic() && isQuickOrder === NON_QUICK_ORDER) {
-                    insertToStatistics(botId, NOT_ORDER, 0, parseInt(result.result), 0);
-                    return;
-                }
                 let order = await getOrder(botId);
                 if (!order) {
                     return;
@@ -323,33 +315,11 @@ function formatDateFromISO(date) {
 function checkRowOneForOrder() {
     var createdMinute = new Date().getMinutes();
     if (createdMinute % 2 === 0) {
-        console.log("Hàng 1");
         return true;
     }
-    console.log("Hàng 3");
     return false;
 }
 
-// Kiểm tra xem có phải đúng kết quả cuối hay không, khoảng cách giữa thời điểm hiện tại k dc dài hơn 1 phút so với kết quả trước đó
-function isValidLastResult(lastStatistics) {
-    var currentHour = new Date().getHours();
-    var currentMinute = new Date().getMinutes();
-    var createdDate = new Date(lastStatistics.created_time);
-    var createdHour = createdDate.getHours();
-    var createdMinute = createdDate.getMinutes();
-    console.log(result);
-
-    if (currentHour !== createdHour) {
-        console.log("Không hợp lệ");
-        return false;
-    }
-    console.log(currentMinute - createdMinute);
-    if (currentMinute - createdMinute > 2) {
-        console.log("Không hợp lệ");
-        return false;
-    }
-    return true;
-}
 
 async function insertOrder(order, price, isQuickOrder, botId) {
     return await database.insertOrder(order, price, isQuickOrder, botId);

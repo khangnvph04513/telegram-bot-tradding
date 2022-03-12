@@ -74,6 +74,7 @@ async function startBot() {
                     }
                     return;
                 }
+                
                 var isNotOrder = false;
                 if (parseInt(lastResult.result) === BUY) {
                     sendToTelegram(groupIds, `Hãy đánh ${orderPrice}$ lệnh Bán \u{2B07}`);
@@ -111,7 +112,6 @@ async function startBot() {
                             isLose = false;
                         } else {
                             console.log("Không đủ điều kiện đánh lệnh -> Đợi tiếp");
-                            stopTime = new Date().getTime();
                         }
                     } else {
                         console.log("Đang chờ vào lệnh");

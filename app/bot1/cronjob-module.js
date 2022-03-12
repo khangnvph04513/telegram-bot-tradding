@@ -42,7 +42,6 @@ async function startBot() {
             let groupIds = await getGroupTelegramByBot(botId);
             if (!result) {
                 if (!isSentMessage) {
-                    console.log('BOT tạm ngưng do không lấy được dữ liệu');
                     sendToTelegram(groupIds, `BOT tạm ngưng do không lấy được dữ liệu`);
                     isSentMessage = true;
                 }
@@ -51,7 +50,6 @@ async function startBot() {
             isSentMessage = false;
             var dBbot = await getBotInfo(botId);
             if (dBbot.is_active === 0) {
-                console.log("Bot dừng");
                 return;
             }
             var orderPrice = 1;
@@ -74,7 +72,7 @@ async function startBot() {
                     return;
                 }
                 if (isQuickOrder === QUICK_ORDER) {
-                } else if (database.checkRowOneForOrder()) {
+                } else if (!database.checkRowOneForOrder()) {
                     return;
                 }
                 var isNotOrder = false;
@@ -119,12 +117,10 @@ async function startBot() {
                                 stopOrStartBot(botId, RUNNING_STATUS);
                                 initSessionVolatility(botId);
                             } else {
-                                console.log("Không đủ điều kiện đánh lệnh -> Đợi tiếp");
                                 stopOrStartBot(botId, STOPPING_STATUS);
                             }
                         } else {
                             stopOrStartBot(botId, STOPPING_STATUS);
-                            console.log("Bot đang dừng -> Chỉ thống kê lệnh, không đánh");
                         }
                     }
                     return;

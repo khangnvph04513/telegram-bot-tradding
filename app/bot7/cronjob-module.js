@@ -43,7 +43,6 @@ async function startBot() {
             isSentMessage = false;
             var dBbot = await getBotInfo(botId);
             if (dBbot.is_active === 0) {
-                console.log("Bot dừng");
                 return;
             }
             var orderPrice = 1;
@@ -85,10 +84,6 @@ async function startBot() {
 
             if (currentTimeSecond === parseInt(timeInfo.resultSecond) || currentTimeSecond === (parseInt(timeInfo.resultSecond) + 1) || (parseInt(timeInfo.resultSecond) + 2)) { // Update kết quả, Thống kê
                 var budget = dBbot.budget;
-                let order = await getOrder(botId);
-                if (!order) {
-                    return;
-                }
                 if (isStop) {
                     insertToStatistics(botId, NOT_ORDER, 0, parseInt(result.result), 0);
                     let currrentTime = new Date().getTime();
@@ -99,14 +94,16 @@ async function startBot() {
                             initSessionVolatility(botId);
                             isLose = false;
                         } else {
-                            console.log("Không đủ điều kiện đánh lệnh -> Đợi tiếp");
-                            stopTime = new Date().getTime();
                         }
                     } else {
-                        console.log("Đang chờ vào lệnh");
                     }
                     return;
                 }
+                let order = await getOrder(botId);
+                if (!order) {
+                    return;
+                }
+                
                 if (database.checkRowOneForStatistic()) {
                     insertToStatistics(botId, NOT_ORDER, 0, parseInt(result.result), 0);
                     return;

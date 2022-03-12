@@ -20,7 +20,7 @@ module.exports.sendApiToCopyTrade =  function (order, price, isQuickOrder, botId
       //console.log(response);
     })
     .catch(function (error) {
-      //console.log(error);
+      console.log(error);
     });
 }
 
@@ -32,6 +32,18 @@ module.exports.sendApiToTradeVolume =  function () {
       
     })
     .catch(function (error) {
-      
+      console.log(error);
+    });
+}
+
+const urlBotSetting = "http://localhost:5555/api/trade/v1/method-setting";
+module.exports.sendApiBotSetting =  function () {
+  axios
+    .post(urlBotSetting)
+    .then(function (response) {
+      console.log(response);
+    })
+    .catch(function (error) {
+      console.log(error);
     });
 }

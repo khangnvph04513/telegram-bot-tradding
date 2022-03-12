@@ -49,7 +49,6 @@ async function startBot() {
             isSentMessage = false;
             var dBbot = await getBotInfo(botId);
             if (dBbot.is_active === 0) {
-                console.log("Bot dừng");
                 return;
             }
             lastStatistics = await getLastStatistics(botId);
@@ -88,8 +87,6 @@ async function startBot() {
                     insertToStatistics(botId, NOT_ORDER, 0, parseInt(result.result), 0);
                     let currrentTime = new Date().getTime();
                     if ((currrentTime - stopTime) >= 1 * MINUTE_LONGTIMEMILIS) {
-                        console.log(`tempOrder ${tempOrder}`);
-                        console.log(`result ${result.result}`);
                         //let statistics = await getStatisticByLimit(botId, 3);
                         if (tempOrder === parseInt(result.result)) {
                             sendToTelegram(groupIds, `SẴN SÀNG VÀO LỆNH!`);
@@ -98,11 +95,9 @@ async function startBot() {
                             isLose = false;
                             isLoseSecondTime = false;
                         } else {
-                            console.log("Không đủ điều kiện đánh lệnh -> Đợi tiếp");
                             stopTime = new Date().getTime();
                         }
                     } else {
-                        console.log("Đang chờ vào lệnh");
                     }
                     return;
                 }

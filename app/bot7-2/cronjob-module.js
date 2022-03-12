@@ -49,7 +49,6 @@ async function startBot() {
             isSentMessage = false;
             var dBbot = await getBotInfo(botId);
             if (dBbot.is_active === 0) {
-                console.log("Bot dừng");
                 return;
             }
             var orderPrice = 1;
@@ -95,28 +94,28 @@ async function startBot() {
                     insertToStatistics(botId, NOT_ORDER, 0, parseInt(result.result), 0);
                     return;
                 }
-                let order = await getOrder(botId);
-                if (!order) {
-                    return;
-                }
+                console.log(`TEST isStop ${isStop}`);
                 if (isStop) {
                     insertToStatistics(botId, NOT_ORDER, 0, parseInt(result.result), 0);
                     let currrentTime = new Date().getTime();
-                    if ((currrentTime - stopTime) >= 2 * MINUTE_LONGTIMEMILIS) {
+                    if ((currrentTime - stopTime) >= 1 * MINUTE_LONGTIMEMILIS) {
                         if (tempOrder === parseInt(result.result)) {
                             sendToTelegram(groupIds, `SẴN SÀNG VÀO LỆNH!`);
                             isStop = false;
                             initSessionVolatility(botId);
                             isLose = false;
                         } else {
-                            console.log("Không đủ điều kiện đánh lệnh -> Đợi tiếp");
-                            stopTime = new Date().getTime();
+                            
                         }
                     } else {
-                        console.log("Đang chờ vào lệnh");
                     }
                     return;
                 }
+                let order = await getOrder(botId);
+                if (!order) {
+                    return;
+                }
+
                 // THẮNG
                 if (parseInt(result.result) === order.orders) {
                     var interest = orderPrice - orderPrice * 0.05;
@@ -296,10 +295,6 @@ async function getOrder(botId) {
 
 async function initSessionVolatility(botId) {
     return await database.initSessionVolatility(botId);
-}
-
-async function stopOrStartBot(botId, isRunning) {
-    return await database.stopOrStartBot(botId, isRunning);
 }
 
 async function updateVolatiltyOfBot(botId, volatility) {

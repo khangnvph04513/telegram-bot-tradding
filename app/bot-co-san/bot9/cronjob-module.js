@@ -39,7 +39,6 @@ async function startBot() {
             let groupIds = await getGroupTelegramByBot(botId);
             if (!result) {
                 if (!isSentMessage) {
-                    console.log('BOT tạm ngưng do không lấy được dữ liệu');
                     sendToTelegram(groupIds, `BOT tạm ngưng do không lấy được dữ liệu`);
                     isSentMessage = true;
                 }
@@ -51,7 +50,6 @@ async function startBot() {
             }
             var dBbot = await getBotInfo(botId);
             if (dBbot.is_active === 0) {
-                console.log("Bot dừng");
                 return;
             }
             var orderPrice = 1;
@@ -68,17 +66,14 @@ async function startBot() {
                     let currrentTime = new Date().getTime();
                     let isReOrder = await isReOrder2();
                     if (database.checkRowOneForOrder() && isReOrder) {
-                        console.log("Đủ điều kiện đánh tiếp");
                         sendToTelegram(groupIds, `SẴN SÀNG VÀO LỆNH`);
                         stopOrStartBot(botId, RUNNING_STATUS);
                     } else {
-                        console.log("Chưa đủ điều kiện đánh tiếp");
                         return;
                     }
 
                 }
                 if (!database.checkRowOneForOrder()) {
-                    console.log("Hàng 1-> Chờ");
                     return;
                 }
                 var isNotOrder = false;
@@ -159,7 +154,6 @@ async function getOrder4FirstRow() {
     if (data.length < 2) {
         return false;
     }
-    console.log(data);
     return data[0];
 }
 
@@ -168,7 +162,6 @@ async function isReOrder2() {
     if (data.length < 5) {
         return 0;
     }
-    console.log(data);
     if (data[2].result === data[4].result) {
         return true;
     }

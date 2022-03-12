@@ -357,7 +357,7 @@ module.exports.checkRowOneForStatistic = function () {
 module.exports.checkRowOneForOrder = function () {
     var createdMinute = new Date().getMinutes();
     if (createdMinute % 2 !== 0) {
-        return true;
+        return false;
     }
-    return false;
+    return true;
 }

@@ -38,12 +38,11 @@ async function startBot() {
     const job = new cron.CronJob({
         cronTime: timeInfo.cronTab,
         onTick: async function () {
+            console.log(timeInfo.cronTab);
             let result = await getLastDataTradding();
             let groupIds = await getGroupTelegramByBot(botId);
-            console.log("TEST 1");
             if (!result) {
                 if (!isSentMessage) {
-                    console.log("TEST 2");
                     sendToTelegram(groupIds, `BOT tạm ngưng do không lấy được dữ liệu`);
                     isSentMessage = true;
                 }
@@ -56,44 +55,33 @@ async function startBot() {
             
             var dBbot = await getBotInfo(botId);
             if (dBbot.is_active === 0) {
-                console.log("TEST 3");
-                console.log("Bot dừng");
                 return;
             }
             lastStatistics = await getLastStatistics(botId);
             if (!lastStatistics) {
-                console.log("TEST 4");
-                console.log("k có data dừng");
                 insertToStatistics(botId, NOT_ORDER, 0, 0, 0);
                 return;
             }
             // lệnh gấp
             let currentTimeSecond = new Date().getSeconds();
             isFirst = false;
-            console.log(`isQuickOrder ${isQuickOrder}`);
             if (currentTimeSecond === parseInt(timeInfo.orderSecond) || currentTimeSecond === (parseInt(timeInfo.orderSecond) + 1) || currentTimeSecond === (parseInt(timeInfo.orderSecond) + 2)) { // Vào lệnh
                 if (dBbot.is_running === STOPPING_STATUS) {
-                    console.log("TEST 5");
                     let currrentTime = new Date().getTime();
                     let isReOrder = await isReOrder2();
                     if (!database.checkRowOneForOrder() && isReOrder) {
-                        console.log("Đủ điều kiện đánh tiếp");
                         sendToTelegram(groupIds, `SẴN SÀNG VÀO LỆNH`);
                         stopOrStartBot(botId, RUNNING_STATUS);
                     } else {
-                        console.log("Chưa đủ điều kiện đánh tiếp");
                         return;
                     }
                     
                 }
                 if (isQuickOrder === NON_QUICK_ORDER && database.checkRowOneForOrder()) {
-                    console.log("TEST 6");
-                    console.log("Lệnh thường -> Chờ kết quả hàng thứ 2 -> Không làm gì cả");
                     return;
                 }
 
                 var isNotOrder = false;
-                console.log(`isQuickOrder ${isQuickOrder}`);
                 if (isQuickOrder === NON_QUICK_ORDER || !database.checkRowOneForOrder()) {
                     let data = await getOrderForThirdRow();
                     if (parseInt(data.result) === BUY) {
@@ -125,7 +113,7 @@ async function startBot() {
 
             if (currentTimeSecond === parseInt(timeInfo.resultSecond) || currentTimeSecond === (parseInt(timeInfo.resultSecond) + 1) || currentTimeSecond === (parseInt(timeInfo.resultSecond) + 2)) { // Update kết quả, Thống kê
                 var budget = dBbot.budget;
-                if (database.checkRowOneForStatistic() && isQuickOrder === NON_QUICK_ORDER) {
+                if (!database.checkRowOneForStatistic() && isQuickOrder === NON_QUICK_ORDER) {
                     insertToStatistics(botId, NOT_ORDER, 0, parseInt(result.result), 0);
                     if (dBbot.is_running === STOPPING_STATUS) {
                         return;
@@ -159,7 +147,6 @@ async function startBot() {
                     var percentInterest = interest / capital * 100;
                     sendToTelegram(groupIds, `Kết quả lượt vừa rồi : Thua \u{274C} \n\u{1F4B0}Số dư: ${budget}$ \n\u{1F4B0}Lãi : ${interest}$ (${percentInterest}%)\n\u{1F4B0}Vốn: ${capital}$`);
                     updateBugget(botId, budget);
-                    console.log(`isQuickOrder ${isQuickOrder}`);
                     if (isQuickOrder === NON_QUICK_ORDER) {
                         insertToStatistics(botId, LOSE, NON_QUICK_ORDER, parseInt(result.result), percentInterest);
                         isQuickOrder = QUICK_ORDER;
@@ -172,7 +159,6 @@ async function startBot() {
                     } else if (isQuickOrder === QUICK_ORDER_THIRD) {
                         insertToStatistics(botId, LOSE, QUICK_ORDER, parseInt(result.result), percentInterest);
                         isQuickOrder = NON_QUICK_ORDER;
-                        console.log(`Tạm dừng, chờ kết quả tiếp theo`);
                         sendToTelegram(groupIds, `Tạm dừng, chờ kết quả tiếp theo`);
                         stopOrStartBot(botId, STOPPING_STATUS);
                     }
@@ -197,7 +183,6 @@ async function getOrderForThirdRow() {
     if (data.length < 2) {
         return false;
     }
-    console.log(data);
     return data[1];
 }
 
@@ -206,7 +191,6 @@ async function getOrder4FirstRow() {
     if (data.length < 4) {
         return false;
     }
-    console.log(data);
     return data[3];
 }
 
@@ -215,9 +199,6 @@ async function isReOrder2() {
     if (data.length < 6) {
         return 0;
     }
-    console.log(data[0]);
-    console.log(data[2]);
-    console.log(data[5]);
     if (data[5].result === data[0].result || data[5].result === data[2].result) {
         return true;
     }
@@ -280,28 +261,6 @@ function roundNumber(num, scale) {
 
 function formatDateFromISO(date) {
     return moment(date.toString()).format("hh:mm:ss");
-}
-
-
-// Kiểm tra xem có phải đúng kết quả cuối hay không, khoảng cách giữa thời điểm hiện tại k dc dài hơn 1 phút so với kết quả trước đó
-function isValidLastResult(lastStatistics) {
-    var currentHour = new Date().getHours();
-    var currentMinute = new Date().getMinutes();
-    var createdDate = new Date(lastStatistics.created_time);
-    var createdHour = createdDate.getHours();
-    var createdMinute = createdDate.getMinutes();
-    console.log(result);
-
-    if (currentHour !== createdHour) {
-        console.log("Không hợp lệ");
-        return false;
-    }
-    console.log(currentMinute - createdMinute);
-    if (currentMinute - createdMinute > 2) {
-        console.log("Không hợp lệ");
-        return false;
-    }
-    return true;
 }
 
 async function insertOrder(order, price, isQuickOrder, botId) {
