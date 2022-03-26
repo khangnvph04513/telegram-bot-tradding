@@ -20,6 +20,18 @@ module.exports.sendApiToCopyTrade =  function (order, price, isQuickOrder, botId
       //console.log(response);
     })
     .catch(function (error) {
+      //console.log(error);
+    });
+}
+
+const urlCheckWaitLose = "http://localhost:5555/api/trade/v1/method-setting";
+module.exports.checkWaitLose =  function () {
+  axios
+    .post(urlCheckWaitLose)
+    .then(function (response) {
+      
+    })
+    .catch(function (error) {
       console.log(error);
     });
 }
@@ -36,12 +48,12 @@ module.exports.sendApiToTradeVolume =  function () {
     });
 }
 
-const urlBotSetting = "http://localhost:5555/api/trade/v1/method-setting";
+const urlBet4Mix = "http://localhost:5555/api/trade/v1/bet-4-mix";
 module.exports.sendApiBotSetting =  function () {
   axios
-    .post(urlBotSetting)
+    .post(urlBet4Mix)
     .then(function (response) {
-      console.log(response);
+      //console.log(response);
     })
     .catch(function (error) {
       console.log(error);

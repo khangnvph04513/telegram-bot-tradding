@@ -32,10 +32,10 @@ puppeteer.launch({ headless: true, args: ['--no-sandbox'] }).then(async browser 
     const page = await browser.newPage()
     await page.setDefaultNavigationTimeout(0);
     await page.goto('https://bitiva1.net/login')
-    await page.type('input[name="email"]', 'gunh39683@gmail.com', { delay: 100 })
-    await page.type('input[name="password"]', '123456', { delay: 100 })
-    // await page.type('input[name="email"]', 'khangnvph045132@gmail.com', { delay: 100 })
-    // await page.type('input[name="password"]', '123@123Aa', { delay: 100 })
+    // await page.type('input[name="email"]', 'gunh39683@gmail.com', { delay: 100 })
+    // await page.type('input[name="password"]', '123456', { delay: 100 })
+    await page.type('input[name="email"]', 'khangnvph045132@gmail.com', { delay: 100 })
+    await page.type('input[name="password"]', '123@123Aa', { delay: 100 })
     await page.click('#main-content > div > div > div > div.boxAuthentication.show > div > div.formWapper.w-100 > form > div.form-group.text-center > button')
 
     // That's it, a single line of code to solve reCAPTCHAs 🎉
@@ -46,7 +46,7 @@ puppeteer.launch({ headless: true, args: ['--no-sandbox'] }).then(async browser 
         page.waitForNavigation(),
     ]);
     const job = new cron.CronJob({
-        cronTime: '45 0/1 * * * *',
+        cronTime: '45 0/2 * * * *',
         onTick: async function () {
             await page.reload({ waitUntil: ["networkidle0"] });
         }
@@ -124,7 +124,12 @@ puppeteer.launch({ headless: true, args: ['--no-sandbox'] }).then(async browser 
                         isRestart = true;
                     }
                     if (isRestart) {
-                        shell.exec('pm2 restart app', function (code, output) {
+                        shell.exec('pm2 stop app', function (code, output) {
+                            console.log('Exit code:', code);
+                            console.log('Program output:', output);
+                        });
+                        await sleep(60000);
+                        shell.exec('pm2 start app', function (code, output) {
                             console.log('Exit code:', code);
                             console.log('Program output:', output);
                         });

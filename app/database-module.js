@@ -77,9 +77,18 @@ module.exports.insertToStatistics = function (botId, result, isQuickOrder, tradd
             resolve(result);
         });
     });
-
 }
 
+module.exports.insertToStatistics4KingAi = function (botId, result, isQuickOrder, traddingData, interest, isStatistics) {
+    return new Promise((resolve, reject) => {
+        var sql = `INSERT INTO statistics (result, bot_id, created_time, is_quick_order, tradding_data, interest, is_statistics) VALUES ('${result}', ${botId}, NOW(), ${isQuickOrder}, ${traddingData}, ${interest}, ${isStatistics})`;
+        connection.query(sql, function (err, result) {
+            if (err) throw err;
+            resolve(result);
+        });
+    });
+
+}
 module.exports.getLastStatistics = function (botId) {
     return new Promise((resolve, reject) => {
         connection.query(`select * from statistics where bot_id=${botId} order by id desc limit 1`, function (err, result, fields) {
@@ -206,6 +215,16 @@ module.exports.updateVolatiltyOfBot = function (botId, volatility) {
     });
 }
 
+module.exports.updateSessionNumAndResetCapital = function (botId, sessionNumber, capital) {
+    return new Promise((resolve, reject) => {
+        connection.query(`update bot set session_num=${sessionNumber},budget = ${capital}  where id=${botId}`, function (err, result, fields) {
+            if (err) throw err;
+            resolve(result);
+            console.log("UPDATE VOLATILITY");
+        });
+    });
+}
+
 module.exports.getStatisticByLimit = function (botId, limit) {
     return new Promise((resolve, reject) => {
         console.log(`select * from statistics where bot_id=${botId} order by id DESC limit ${limit}`);
@@ -267,6 +286,17 @@ module.exports.clearData = function () {
 module.exports.initBot = function () {
     return new Promise((resolve, reject) => {
         connection.query(`update bot set is_running=1, updated_at=now(), session_volatility = 0, budget=100`, function (err, result, fields) {
+            if (err) throw err;
+            resolve(result);
+        });
+    });
+}
+
+module.exports.initBotKingAiBot = function (botId) {
+    // update von
+    // update sessionnum = 1
+    return new Promise((resolve, reject) => {
+        connection.query(`update bot set is_running=1, updated_at=now(), session_volatility = 0, session_num = 1, budget = 15 where id = ${botId}`, function (err, result, fields) {
             if (err) throw err;
             resolve(result);
         });
