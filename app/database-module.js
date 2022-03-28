@@ -6,8 +6,8 @@ const api = require('./server');
 var connection = mysql.createConnection({
     host: '127.0.0.1',
     user: 'root',
-    password: '1234',
-    //password: 'aA123456789^Aa@',
+    //password: '1234',
+    password: 'aA123456789^Aa@',
     database: 'tradding_db'
 });
 connection.connect(function (err) {
@@ -181,6 +181,17 @@ module.exports.statisticDay = function (botId, timeAfter) {
     });
 }
 
+module.exports.getStatistic = function (botId, timeAfter) {
+    return new Promise((resolve, reject) => {
+        console.log(`select * from statistics where bot_id=${botId} and created_time >= CURDATE() and result!='NOT_ORDER' order by id DESC`);
+        connection.query(`select * from statistics where bot_id=${botId} and result!='NOT_ORDER' order by id DESC`, function (err, result, fields) {
+            console.log(result.length);
+            if (err) reject(err);
+            resolve(result);
+        });
+    });
+}
+
 
 module.exports.initSessionVolatility = function (botId) {
     return new Promise((resolve, reject) => {
@@ -292,11 +303,11 @@ module.exports.initBot = function () {
     });
 }
 
-module.exports.initBotKingAiBot = function (botId) {
+module.exports.initBotKingAiBot = function (botId, budget) {
     // update von
     // update sessionnum = 1
     return new Promise((resolve, reject) => {
-        connection.query(`update bot set is_running=1, updated_at=now(), session_volatility = 0, session_num = 1, budget = 15 where id = ${botId}`, function (err, result, fields) {
+        connection.query(`update bot set is_active=1, updated_at=now(), session_volatility = 0, session_num = 0, budget = ${budget} where id = ${botId}`, function (err, result, fields) {
             if (err) throw err;
             resolve(result);
         });

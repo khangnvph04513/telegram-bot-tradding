@@ -122,26 +122,29 @@ async function startBot() {
                 // THẮNG
                 if (parseInt(result.result) === order.orders) {
                     var interest = orderPrice - orderPrice * 0.05;
+                    let percent = interest / CAPITAL * 100;
+                    percent = parseFloat(percent).toFixed(2);
                     budget = roundNumber(budget + interest, 2);
-                    var percentInterest = interest / capital * 100;
-                    sendToTelegram(groupIds, `Kết quả lượt vừa rồi : Thắng \u{1F389} \n\u{1F4B0}Số dư: ${budget}$ \n\u{1F4B0}Lãi : + ${interest}$ (+${percentInterest}%)\n\u{1F4B0}Vốn: ${capital}$`);
+                    sendToTelegram(groupIds, `Kết quả lượt vừa rồi : Thắng \u{1F389} \n\u{1F4B0}Số dư: ${budget}$ \n\u{1F4B0}Lãi : + ${interest}$ (+${percent}%)\n\u{1F4B0}Vốn: ${capital}$`);
                     updateBugget(botId, budget);
-                    insertToStatistics4KingAi(botId, LOSE, isQuickOrder, parseInt(result.result), percentInterest, STOP_SESSION_WIN);
+                    insertToStatistics4KingAi(botId, LOSE, isQuickOrder, parseInt(result.result), interest, STOP_SESSION_WIN);
                     updateVolatiltyOfBot(botId, 0);
                     orderPrice = 1;
                     numQuickOrder = 0; // Chốt phiên
-                    putStatistics(dBbot);
+                    putStatistics(dBbot, groupIds);
                     isQuickOrder = NON_QUICK_ORDER;
                 } else { // THUA
                     var interest = -1 * orderPrice;
                     budget = roundNumber(budget + interest, 2);
+                    let percent = interest / CAPITAL * 100;
+                    percent = parseFloat(percent).toFixed(2);
                     var percentInterest = interest / capital * 100;
-                    sendToTelegram(groupIds, `Kết quả lượt vừa rồi : Thua \u{274C} \n\u{1F4B0}Số dư: ${budget}$ \n\u{1F4B0}Lãi : ${interest}$ (${percentInterest}%)\n\u{1F4B0}Vốn: ${capital}$`);
+                    sendToTelegram(groupIds, `Kết quả lượt vừa rồi : Thua \u{274C} \n\u{1F4B0}Số dư: ${budget}$ \n\u{1F4B0}Lãi : ${interest}$ (${percent}%)\n\u{1F4B0}Vốn: ${capital}$`);
                     updateBugget(botId, budget);
-                    insertToStatistics4KingAi(botId, LOSE, isQuickOrder, parseInt(result.result), percentInterest, NOT_STOP_SESSION);
+                    insertToStatistics4KingAi(botId, LOSE, isQuickOrder, parseInt(result.result), interest, NOT_STOP_SESSION);
                     console.log(`numQuickOrder ${numQuickOrder}`);
                     if (numQuickOrder === STOP_QUICK) {
-                        putStatistics(dBbot);
+                        putStatistics(dBbot, groupIds);
                         console.log(`CHOOTS PHIEN`);
                         insertToStatistics4KingAi(botId, LOSE, isQuickOrder, parseInt(result.result), percentInterest, STOP_SESSION_LOSE);
                         numQuickOrder = 0; // Chốt phiên
@@ -175,9 +178,11 @@ async function getCronTimeInfo() {
     return { cronTab: cronTab, orderSecond: orderSecond.value, resultSecond: resultSecond.value }
 }
 
-async function putStatistics(dBbot) {
+async function putStatistics(dBbot, groupIds) {
     console.log(dBbot);
-    let sessionNumber = dBbot.session_number;
+    let statisticalsTimeAfterStr = [];
+    let sessionNumber = dBbot.session_num;
+    let index = 0;
     sessionNumber++;
     let limitStatistics = sessionNumber;
     if (limitStatistics >= 50) {
@@ -186,16 +191,22 @@ async function putStatistics(dBbot) {
     await updateSessionNumAndResetCapital(dBbot.id, sessionNumber, CAPITAL);
     let statisticsMsg = [];
     statisticsMsg.push(`\u{267B} Tổng hợp ${limitStatistics} phiên gần nhất:\n`);
-    let statisc = await statisticDay(botId, STATISTIC_TIME_AFTER);
+    let statisc = await statisticDay(dBbot.id, limitStatistics);
+    console.log(statisc);
+    
     if (!statisc) {
+        console.log(`STOP thống kê `);
         return;
     }
     statisc.forEach(e => {
+
         if (e.is_statistics === STOP_SESSION_WIN) {
-            statisticalsTimeAfterStr.push(`\u{1F389} Phiên ${sessionNumber - index} (${formatDateFromISO(e.created_time)}) THẮNG + ${e.interest} $ (${e.interest / CAPITAL * 100} %) \n`);
+            let percent = e.interest / CAPITAL * 100;
+            percent = parseFloat(percent).toFixed(2);
+            statisticalsTimeAfterStr.push(`Phiên ${sessionNumber - index} (${formatDateFromISO(e.created_time)}) \u{1F389}  + ${e.interest} $ (${percent} %) \n`);
             index++;
         } else if (e.is_statistics === STOP_SESSION_LOSE) {
-            statisticalsTimeAfterStr.push(`\u{1F389} Phiên ${sessionNumber - index} (${formatDateFromISO(e.created_time)}) THUA + -${CAPITAL} $ (100%) \n`);
+            statisticalsTimeAfterStr.push(`Phiên ${sessionNumber - index} (${formatDateFromISO(e.created_time)}) \u{274C} \u{1F4B0} -${CAPITAL} $ (100%) \n`);
             index++;
         }
     });

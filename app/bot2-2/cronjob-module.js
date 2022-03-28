@@ -10,7 +10,7 @@ var moment = require('moment');
 // Link unicode của icon telegram : https://apps.timwhitlock.info/emoji/tables/unicode
 
 const botId = 3;
-const BOT_NAME = "Bot tín hiệu 2.2";
+const BOT_NAME = "Xác suất 4 bóng ( hàng 3 )";
 const RUNNING_STATUS = 1;
 const STOPPING_STATUS = 0;
 const DISABLE_STATUS = 3;

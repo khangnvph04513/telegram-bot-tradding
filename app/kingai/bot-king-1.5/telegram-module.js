@@ -1,6 +1,6 @@
 const { Telegraf } = require('telegraf');
 
-const bot = new Telegraf('2106201046:AAH0-eCPG6d9VVAyXNhQQjmAmsJM4FBWXgs');
+const bot = new Telegraf('5157530792:AAE-rVHTQR_-DSJyWLbES0cOU2NOMd9apT05157530792:AAE-rVHTQR_-DSJyWLbES0cOU2NOMd9apT0'); // tradding_4341_bot
 // 1988197681:AAHK5okW0zGFMV_3KlP1cwJRBRhoUK5D8Dk bot get id
 bot.command('getId', ctx => {
     bot.telegram.sendMessage(ctx.chat.id, "Id of Group or Channel is: " + ctx.chat.id, {})
@@ -8,11 +8,11 @@ bot.command('getId', ctx => {
 
 bot.command('image', (ctx) => ctx.replyWithPhoto({ url: 'https://picsum.photos/200/300/?random' }));
 // Lấy telegram groupid bằng url
-// https://api.telegram.org/bot2106201046:AAH0-eCPG6d9VVAyXNhQQjmAmsJM4FBWXgs/getUpdates
-// https://api.telegram.org/bot1740325065:AAGNCtKTLmsYpkmQOG_HlU7TuDxHIxouGgg/getUpdates
+// https://api.telegram.org/bot1988197681:AAHK5okW0zGFMV_3KlP1cwJRBRhoUK5D8Dk/getUpdates
+// https://api.telegram.org/bot5157530792:AAE-rVHTQR_-DSJyWLbES0cOU2NOMd9apT0/getUpdates
 // Nếu bị dính lỗi Something went wrong, please try again hãy revoke lại bot
 
-bot.telegram.sendMessage(-1001610477819, "Bot tiến hành khởi động, nhận tín hiệu từ bot tín hiệu 7"); // Gửi tin nhắn 
+bot.telegram.sendMessage(-1001676896094, "Khởi động phương pháp KingAI 1.5"); // Gửi tin nhắn 
 bot.launch();
 module.exports = bot;
 

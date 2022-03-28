@@ -10,6 +10,8 @@ const job = new cron.CronJob({
         clearDataOrders();
         clearData();
         initBot();
+        initKingAiBot(19);
+        initKingAiBot(20);
     },
     start: true,
     timeZone: 'Asia/Ho_Chi_Minh' // Lưu ý set lại time zone cho đúng 
@@ -163,6 +165,15 @@ async function getLastDataTradding() {
 
 async function getData() {
     return await database.getLastResult();
+}
+
+async function initKingAiBot(botId) {
+    if (botId === 19) { // bot 1.4
+        return await database.initBotKingAiBot(botId, 15);
+    } else if (botId === 31) {
+        return await database.initBotKingAiBot(botId, 31);
+    }
+    
 }
 
 module.exports = job;
