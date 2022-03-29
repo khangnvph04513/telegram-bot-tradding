@@ -79,9 +79,10 @@ module.exports.insertToStatistics = function (botId, result, isQuickOrder, tradd
     });
 }
 
-module.exports.insertToStatistics4KingAi = function (botId, result, isQuickOrder, traddingData, interest, isStatistics) {
+module.exports.insertToStatistics4KingAi = function (botId, result, isQuickOrder, traddingData, interest, percentInterest, isStatistics) {
+    console.log(`INSERT INTO statistics (result, bot_id, created_time, is_quick_order, tradding_data, interest, percent_interest, is_statistics) VALUES ('${result}', ${botId}, NOW(), ${isQuickOrder}, ${traddingData}, ${interest}, ${percentInterest}, ${isStatistics})`);
     return new Promise((resolve, reject) => {
-        var sql = `INSERT INTO statistics (result, bot_id, created_time, is_quick_order, tradding_data, interest, is_statistics) VALUES ('${result}', ${botId}, NOW(), ${isQuickOrder}, ${traddingData}, ${interest}, ${isStatistics})`;
+        var sql = `INSERT INTO statistics (result, bot_id, created_time, is_quick_order, tradding_data, interest, percent_interest, is_statistics) VALUES ('${result}', ${botId}, NOW(), ${isQuickOrder}, ${traddingData}, ${interest}, ${percentInterest}, ${isStatistics})`;
         connection.query(sql, function (err, result) {
             if (err) throw err;
             resolve(result);
@@ -183,8 +184,8 @@ module.exports.statisticDay = function (botId, timeAfter) {
 
 module.exports.getStatistic = function (botId, timeAfter) {
     return new Promise((resolve, reject) => {
-        console.log(`select * from statistics where bot_id=${botId} and created_time >= CURDATE() and result!='NOT_ORDER' order by id DESC`);
-        connection.query(`select * from statistics where bot_id=${botId} and result!='NOT_ORDER' order by id DESC`, function (err, result, fields) {
+        console.log(`select * from statistics where bot_id=${botId} and created_time >= CURDATE() and result!='NOT_ORDER' order by id DESC limit ${timeAfter}`);
+        connection.query(`select * from statistics where bot_id=${botId} and result!='NOT_ORDER' order by id DESC limit ${timeAfter}`, function (err, result, fields) {
             console.log(result.length);
             if (err) reject(err);
             resolve(result);
@@ -313,6 +314,20 @@ module.exports.initBotKingAiBot = function (botId, budget) {
         });
     });
 }
+
+module.exports.resetCapital4KingAi = function (botId, budget) {
+    // update von
+    // update sessionnum = 1
+    return new Promise((resolve, reject) => {
+        connection.query(`update bot set is_active=1, updated_at=now(), session_volatility = 0, budget = ${budget} where id = ${botId}`, function (err, result, fields) {
+            if (err) throw err;
+            resolve(result);
+        });
+    });
+}
+
+
+
 
 module.exports.getGroupTelegramByBot = function (botId) {
     return new Promise((resolve, reject) => {

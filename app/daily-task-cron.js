@@ -167,6 +167,7 @@ async function getData() {
     return await database.getLastResult();
 }
 
+resetCapital4KingAi(19);
 async function initKingAiBot(botId) {
     if (botId === 19) { // bot 1.4
         return await database.initBotKingAiBot(botId, 15);
@@ -175,5 +176,15 @@ async function initKingAiBot(botId) {
     }
     
 }
+
+async function resetCapital4KingAi(botId) {
+    if (botId === 19) { // bot 1.4
+        return await database.resetCapital4KingAi(botId, 15);
+    } else if (botId === 21) {
+        return await database.resetCapital4KingAi(botId, 31);
+    }
+    
+}
+
 
 module.exports = job;
