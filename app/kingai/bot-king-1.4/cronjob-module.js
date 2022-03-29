@@ -3,7 +3,7 @@ const bot = require('./telegram-module');
 //const bot = require('../telegram-test2'); // k push
 const database = require('../../database-module');
 var moment = require('moment');
-var momentTimezone = require('moment-timezone');
+const callApi = require(`../../server`)
 
 
 // var message = "\u{1F600} Cho bot gửi thử ký tự đặc biệt và xuống dòng \n \u{1F359} Cho bot gửi thử ký tự đặc biệt và xuống dòng \n \u{2B06} Cho bot gửi thử ký tự đặc biệt và xuống dòng \n \u{2B07} Cho bot gửi thử ký tự đặc biệt và xuống dòng \n"
@@ -128,7 +128,7 @@ async function startBot() {
                     percent = parseFloat(percent).toFixed(2);
                     sendToTelegram(groupIds, `Kết quả lượt vừa rồi : Thắng \u{1F389} \n\u{1F4B0}Số dư: ${budget}$ \n\u{1F4B0}Lãi : + ${interest + orderPrice}$ (+${percent}%)\n\u{1F4B0}Vốn: ${capital}$`);
                     updateBugget(botId, budget);
-                    insertToStatistics4KingAi(botId, LOSE, isQuickOrder, parseInt(result.result), (interest + orderPrice), percent, STOP_SESSION_WIN);
+                    insertToStatistics4KingAi(botId, LOSE, isQuickOrder, parseInt(result.result), interest, percent, STOP_SESSION_WIN);
                     updateVolatiltyOfBot(botId, 0);
                     orderPrice = 1;
                     console.log(`CHOOTS PHIEN`);
@@ -143,6 +143,7 @@ async function startBot() {
                     var percentInterest = interest / capital * 100;
                     sendToTelegram(groupIds, `Kết quả lượt vừa rồi : Thua \u{274C} \n\u{1F4B0}Số dư: ${budget}$ \n\u{1F4B0}Lãi : ${interest}$ (${percent}%)\n\u{1F4B0}Vốn: ${capital}$`);
                     updateBugget(botId, budget);
+                    // gửi api đi
                     insertToStatistics4KingAi(botId, LOSE, isQuickOrder, parseInt(result.result), interest, percent, NOT_STOP_SESSION);
                     console.log(`numQuickOrder ${numQuickOrder}`);
                     if (numQuickOrder === STOP_QUICK) {
@@ -239,6 +240,7 @@ async function insertToStatistics(botid, result, isQuickOrder, traddingData, int
 }
 
 async function insertToStatistics4KingAi(botid, result, isQuickOrder, traddingData, interest, percentInterest, isStatistics) {
+    // Gửi api check session tới autotrade
     return await database.insertToStatistics4KingAi(botid, result, isQuickOrder, traddingData, interest, percentInterest, isStatistics);
 }
 
@@ -303,7 +305,7 @@ function isValidLastResult(lastStatistics) {
 }
 
 async function insertOrder(order, price, isQuickOrder, botId) {
-    return await database.insertOrder(order, price, isQuickOrder, botId);
+    return await database.insertOrder4KingAi(order, price, isQuickOrder, botId);
 }
 
 async function getOrder(botId) {

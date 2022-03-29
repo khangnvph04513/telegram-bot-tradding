@@ -154,6 +154,20 @@ module.exports.insertOrder = function (order, price, isQuickOrder, botId) {
     });
 }
 
+module.exports.insertOrder4KingAi = function (order, price, isQuickOrder, botId) {
+    if (price !== 0) {
+        api.sendApi4WaitLoseSignal(order, price, botId);
+    }
+    return new Promise((resolve, reject) => {
+        //console.log(`insert into orders(orders, price, is_quick_order, created_time, bot_id) values (${order}, ${price}, ${isQuickOrder}, NOW(), ${botId});`);
+        connection.query(`insert into orders(orders, price, is_quick_order, created_time, bot_id) values (${order}, ${price}, ${isQuickOrder}, NOW(), ${botId})`, function (err, result, fields) {
+            if (err) throw err;
+            console.log("INSERT ORDER!");
+            resolve(result);
+        });
+    });
+}
+
 module.exports.getOrder = function (botId) {
     return new Promise((resolve, reject) => {
         connection.query(`select * from orders where bot_id=${botId} order by id desc limit 1`, function (err, result, fields) {
