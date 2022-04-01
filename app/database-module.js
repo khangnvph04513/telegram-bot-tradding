@@ -10,6 +10,15 @@ var connection = mysql.createConnection({
     password: 'aA123456789^Aa@',
     database: 'tradding_db'
 });
+
+// var connection = mysql.createConnection({
+//     host: '128.199.160.33',
+//     user: 'login-portal',
+//     //password: '1234',
+//     password: '123456@Aa',
+//     database: 'tradding_db'
+// });
+
 connection.connect(function (err) {
     if (err) throw err;
     console.log("Connected!");
@@ -200,6 +209,17 @@ module.exports.getStatistic = function (botId, timeAfter) {
     return new Promise((resolve, reject) => {
         console.log(`select * from statistics where bot_id=${botId} and created_time >= CURDATE() and result!='NOT_ORDER' order by id DESC limit ${timeAfter}`);
         connection.query(`select * from statistics where bot_id=${botId} and result!='NOT_ORDER' order by id DESC limit ${timeAfter}`, function (err, result, fields) {
+            console.log(result.length);
+            if (err) reject(err);
+            resolve(result);
+        });
+    });
+}
+
+module.exports.getStatistic4KingAi = function (botId, timeAfter) {
+    return new Promise((resolve, reject) => {
+        console.log(`select * from statistics where bot_id=${botId} and is_statistics != 0 and result!='NOT_ORDER' order by id DESC limit ${timeAfter}`);
+        connection.query(`select * from statistics where bot_id=${botId} and is_statistics != 0 and result!='NOT_ORDER' order by id DESC limit ${timeAfter}`, function (err, result, fields) {
             console.log(result.length);
             if (err) reject(err);
             resolve(result);

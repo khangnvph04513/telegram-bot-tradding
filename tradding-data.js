@@ -85,7 +85,7 @@ puppeteer.launch({ headless: true, args: ['--no-sandbox'] }).then(async browser 
                 } else if (finalSide === "DOWN") {
                     result = `Kết quả bóng vừa rồi : Đỏ \u{1F34E}`
                     lastResult = 1;
-                } else if (finalSide === "NORMAL") {
+                } else {
                     result = `Kết quả bóng vừa rồi : Hòa`
                     lastResult = 2;
                 }

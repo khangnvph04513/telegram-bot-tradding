@@ -4,14 +4,14 @@ const api = require('./server');
 var shell = require('shelljs');
 const job = new cron.CronJob({
     cronTime: '0 0 0 * * *',
-    onTick: async function() {
+    onTick: async function () {
         console.log("Migrate data vào đầu ngày");
         clearDataStatistic();
         clearDataOrders();
         clearData();
         initBot();
         initKingAiBot(19);
-        initKingAiBot(20);
+        initKingAiBot(8);
     },
     start: true,
     timeZone: 'Asia/Ho_Chi_Minh' // Lưu ý set lại time zone cho đúng 
@@ -20,11 +20,11 @@ job.start();
 
 const jobRestart = new cron.CronJob({
     cronTime: '0 0 0 * * *',
-    onTick: async function() {
-        shell.exec('pm2 restart tradding-data', function(code, output) {
+    onTick: async function () {
+        shell.exec('pm2 restart tradding-data', function (code, output) {
             console.log('Exit code:', code);
             console.log('Program output:', output);
-          });
+        });
     },
     start: true,
     timeZone: 'Asia/Ho_Chi_Minh' // Lưu ý set lại time zone cho đúng 
@@ -99,7 +99,7 @@ async function getCronTimeInfo() {
     let orderSecond = await database.getSettingByKey(ORDER_SETTING_TIME_KEY);
     let resultSecond = await database.getSettingByKey(RESULT_SETTING_TIME_KEY);
     let cronTab = `${orderSecond.value} * * * * *`;
-    return {cronTab: cronTab, orderSecond: orderSecond.value, resultSecond: resultSecond.value}
+    return { cronTab: cronTab, orderSecond: orderSecond.value, resultSecond: resultSecond.value }
 }
 
 async function getTimeStatisticsInfo() {
@@ -112,7 +112,7 @@ async function getTimeStatisticsInfo() {
         time4Check = time4Check - 60;
     }
     let cronTab = `${time4Check} * * * * *`;
-    return {cronTab: cronTab, orderSecond: orderSecond.value, resultSecond: resultSecond.value}
+    return { cronTab: cronTab, orderSecond: orderSecond.value, resultSecond: resultSecond.value }
 }
 
 async function checkTraddingData() {
@@ -125,10 +125,10 @@ async function checkTraddingData() {
             console.log(lastResult);
             if (!lastResult) {
                 console.log("RESTART TRADDING-DATA");
-                shell.exec('pm2 restart tradding-data', function(code, output) {
+                shell.exec('pm2 restart tradding-data', function (code, output) {
                     console.log('Exit code:', code);
                     console.log('Program output:', output);
-                  });
+                });
             }
         }
     });
@@ -145,10 +145,10 @@ async function getTimeOderInfo() {
     let time4Check = parseInt(orderSecond.value) + 2;
     console.log(orderSecond.value);
     if (time4Check > 60) {
-        time4Check = time4Check -60;
+        time4Check = time4Check - 60;
     }
     let cronTab = `${time4Check} * * * * *`;
-    return {cronTab: cronTab, orderSecond: orderSecond.value, resultSecond: resultSecond.value}
+    return { cronTab: cronTab, orderSecond: orderSecond.value, resultSecond: resultSecond.value }
 }
 
 async function getLastDataTradding() {
@@ -168,13 +168,14 @@ async function getData() {
 }
 
 resetCapital4KingAi(19);
+resetCapital4KingAi(8);
 async function initKingAiBot(botId) {
     if (botId === 19) { // bot 1.4
         return await database.initBotKingAiBot(botId, 15);
     } else if (botId === 31) {
         return await database.initBotKingAiBot(botId, 31);
     }
-    
+
 }
 
 async function resetCapital4KingAi(botId) {
@@ -182,8 +183,10 @@ async function resetCapital4KingAi(botId) {
         return await database.resetCapital4KingAi(botId, 15);
     } else if (botId === 21) {
         return await database.resetCapital4KingAi(botId, 31);
+    } else if (botId === 8) {
+        return await database.resetCapital4KingAi(botId, 31);
     }
-    
+
 }
 
 

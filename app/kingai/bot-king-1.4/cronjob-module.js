@@ -26,6 +26,7 @@ const QUICK_ORDER = 1;
 const STOP_SESSION_WIN = 1;
 const STOP_SESSION_LOSE = 2;
 const NOT_STOP_SESSION = 0;
+const SESSION_LOSE_NUM = 4;
 const BUY = 0;
 const SELL = 1;
 const DRAW = 'DRAW';
@@ -60,7 +61,7 @@ async function startBot() {
 
             lastStatistics = await getLastStatistics(botId);
             if (!lastStatistics) {
-                insertToStatistics(botId, NOT_ORDER, 0, 0, 0);
+                insertToStatistics(dBbot, NOT_ORDER, 0, parseInt(result.result), 0, 0, 0);
                 return;
             }
 
@@ -107,7 +108,7 @@ async function startBot() {
             if (currentTimeSecond === parseInt(timeInfo.resultSecond) || currentTimeSecond === (parseInt(timeInfo.resultSecond) + 1) || currentTimeSecond === (parseInt(timeInfo.resultSecond) + 2)) { // Update kết quả, Thống kê
                 var budget = dBbot.budget;
                 if (database.checkRowOneForStatistic() && isQuickOrder === NON_QUICK_ORDER) {
-                    insertToStatistics(botId, NOT_ORDER, 0, parseInt(result.result), 0);
+                    insertToStatistics(dBbot, NOT_ORDER, 0, parseInt(result.result), 0, 0, 0);
                     return;
                 }
 
@@ -117,6 +118,7 @@ async function startBot() {
                 }
                 // Hòa
                 if (parseInt(result.result) === DRAW) {
+                    insertToStatistics4KingAi(dBbot, WIN, isQuickOrder, parseInt(result.result), interest, percent, STOP_SESSION_WIN);
                     sendToTelegram(groupIds, `Kết quả lượt vừa rồi : Hòa \u{1F4B0} \n\u{1F4B0}Số dư: ${budget}$ \n\u{1F4B0} Vốn: ${capital}$`);
                     return;
                 }
@@ -125,10 +127,12 @@ async function startBot() {
                     var interest = orderPrice * 0.95;
                     budget = roundNumber(budget + interest, 2);
                     let percent = (budget - CAPITAL) / CAPITAL * 100;
+                    interest = budget - CAPITAL;
+                    interest = parseFloat(interest).toFixed(2);
                     percent = parseFloat(percent).toFixed(2);
-                    sendToTelegram(groupIds, `Kết quả lượt vừa rồi : Thắng \u{1F389} \n\u{1F4B0}Số dư: ${budget}$ \n\u{1F4B0}Lãi : + ${interest + orderPrice}$ (+${percent}%)\n\u{1F4B0}Vốn: ${capital}$`);
+                    sendToTelegram(groupIds, `Kết quả lượt vừa rồi : Thắng \u{1F389} \n\u{1F4B0}Số dư: ${budget}$ \n\u{1F4B0}Lãi : + ${interest}$ (+${percent}%)\n\u{1F4B0}Vốn: ${CAPITAL}$`);
                     updateBugget(botId, budget);
-                    insertToStatistics4KingAi(botId, LOSE, isQuickOrder, parseInt(result.result), interest, percent, STOP_SESSION_WIN);
+                    insertToStatistics4KingAi(dBbot, WIN, isQuickOrder, parseInt(result.result), interest, percent, STOP_SESSION_WIN);
                     updateVolatiltyOfBot(botId, 0);
                     orderPrice = 1;
                     console.log(`CHOOTS PHIEN`);
@@ -139,28 +143,28 @@ async function startBot() {
                     var interest = -1 * orderPrice;
                     budget = roundNumber(budget + interest, 2);
                     let percent = (budget - CAPITAL) / CAPITAL * 100;
+                    interest = budget - CAPITAL;
+                    interest = parseFloat(interest).toFixed(2);
                     percent = parseFloat(percent).toFixed(2);
                     var percentInterest = interest / capital * 100;
-                    sendToTelegram(groupIds, `Kết quả lượt vừa rồi : Thua \u{274C} \n\u{1F4B0}Số dư: ${budget}$ \n\u{1F4B0}Lãi : ${interest}$ (${percent}%)\n\u{1F4B0}Vốn: ${capital}$`);
+                    sendToTelegram(groupIds, `Kết quả lượt vừa rồi : Thua \u{274C} \n\u{1F4B0}Số dư: ${budget}$ \n\u{1F4B0}Lãi : ${interest}$ (${percent}%)\n\u{1F4B0}Vốn: ${CAPITAL}$`);
                     updateBugget(botId, budget);
-                    // gửi api đi
-                    insertToStatistics4KingAi(botId, LOSE, isQuickOrder, parseInt(result.result), interest, percent, NOT_STOP_SESSION);
+                    
                     console.log(`numQuickOrder ${numQuickOrder}`);
                     if (numQuickOrder === STOP_QUICK) {
                         putStatistics(dBbot, groupIds);
                         console.log(`CHOOTS PHIEN`);
-                        insertToStatistics4KingAi(botId, LOSE, isQuickOrder, parseInt(result.result), interest, percent , STOP_SESSION_LOSE);
+                        insertToStatistics4KingAi(dBbot, LOSE, isQuickOrder, parseInt(result.result), interest, percent, STOP_SESSION_LOSE);
                         numQuickOrder = 0; // Chốt phiên
                         isQuickOrder = NON_QUICK_ORDER;
                         orderPrice = 1;
                     } else {
+                        insertToStatistics4KingAi(dBbot, LOSE, isQuickOrder, parseInt(result.result), interest, percent, NOT_STOP_SESSION);
                         numQuickOrder++;
                         isQuickOrder = QUICK_ORDER;
                     }
 
                 }
-                // Thống kê sau n lệnh
-                await sleep(5000);
             }
         },
         start: true,
@@ -185,29 +189,28 @@ async function putStatistics(dBbot, groupIds) {
     console.log(dBbot);
     let statisticalsTimeAfterStr = [];
     let sessionNumber = dBbot.session_num;
-    let index = 0;
     sessionNumber++;
     let limitStatistics = sessionNumber;
     if (limitStatistics >= 50) {
         limitStatistics = 50;
     }
+    let index = sessionNumber - limitStatistics;
     await updateSessionNumAndResetCapital(dBbot.id, sessionNumber, CAPITAL);
     console.log(`TEST ${limitStatistics}`);
     let statisticsMsg = [];
     statisticsMsg.push(`\u{267B} Tổng hợp ${limitStatistics} phiên gần nhất:\n`);
     let statisc = await getStatistic(dBbot.id, limitStatistics);
-
+    statisc = statisc.reverse();
     if (!statisc) {
         console.log(`STOP thống kê `);
         return;
     }
     statisc.forEach(e => {
-
         if (e.is_statistics === STOP_SESSION_WIN) {
-            statisticalsTimeAfterStr.push(` Phiên ${sessionNumber - index} (${formatDateFromISO(e.created_time, "Asia/Ho_Chi_Minh")}) \u{1F389} + ${e.interest} $ (${e.percent_interest} %) \n`);
+            statisticalsTimeAfterStr.push(` Phiên ${index} (${formatDateFromISO(e.created_time, "Asia/Ho_Chi_Minh")}) \u{1F389} + ${e.interest} $ (${e.percent_interest} %) \n`);
             index++;
         } else if (e.is_statistics === STOP_SESSION_LOSE) {
-            statisticalsTimeAfterStr.push(` Phiên ${sessionNumber - index} (${formatDateFromISO(e.created_time, "Asia/Ho_Chi_Minh")}) \u{274C} -${CAPITAL} $ (100%) \n`);
+            statisticalsTimeAfterStr.push(` Phiên ${index} (${formatDateFromISO(e.created_time, "Asia/Ho_Chi_Minh")}) \u{274C} -${CAPITAL} $ (100%) \n`);
             index++;
         }
     });
@@ -235,22 +238,22 @@ async function updateBugget(botid, bugdet) {
     return await database.updateBugget(botid, bugdet);
 }
 
-async function insertToStatistics(botid, result, isQuickOrder, traddingData, interest) {
-    return await database.insertToStatistics(botid, result, isQuickOrder, traddingData, interest);
+async function insertToStatistics4KingAi(dbBot, result, isQuickOrder, traddingData, interest, percentInterest, isStatistics) {
+    // Gửi api check session tới autotrade
+    const currentTime = new Date().getTime();
+    await database.insertToStatistics4KingAi(dbBot.id, result, isQuickOrder, traddingData, interest, percentInterest, isStatistics);
+    return callApi.sendApi4WaitLoseSignalCheck(dbBot.session_num, currentTime, dbBot.id, SESSION_LOSE_NUM);
 }
 
-async function insertToStatistics4KingAi(botid, result, isQuickOrder, traddingData, interest, percentInterest, isStatistics) {
+async function insertToStatistics(dbBot, result, isQuickOrder, traddingData, interest, percentInterest, isStatistics) {
     // Gửi api check session tới autotrade
-    return await database.insertToStatistics4KingAi(botid, result, isQuickOrder, traddingData, interest, percentInterest, isStatistics);
+    const currentTime = new Date().getTime();
+    return await database.insertToStatistics4KingAi(dbBot.id, result, isQuickOrder, traddingData, interest, percentInterest, isStatistics);
 }
 
 
 async function getLastStatistics(botid) {
     return await database.getLastStatistics(botid);
-}
-
-async function updateStatusForStatistics(botId) {
-    return await database.updateStatusForStatistics(botId);
 }
 
 function roundNumber(num, scale) {
@@ -272,7 +275,7 @@ async function statistic(botid, timeAfter) {
 
 async function getStatistic(botid, timeAfter) {
     console.log(`TEST GET STATISTICS`);
-    return await database.getStatistic(botid, timeAfter);
+    return await database.getStatistic4KingAi(botid, timeAfter);
 }
 
 // function formatDateFromISO(date) {

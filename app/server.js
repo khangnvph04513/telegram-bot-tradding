@@ -60,27 +60,46 @@ module.exports.sendApiBotSetting = function () {
     });
 }
 const waitLoseSignalUrl = "http://localhost:5555/api/trade/v1/waitLoseSignalBet";
-  module.exports.sendApi4WaitLoseSignal = function (order, price, botId) {
-    let betType = null;
-    if (order === 0) {
-      betType = "UP";
-    } else if (order === 1) {
-      betType = "DOWN";
-    }
-    let data = {
-      betType: betType,
-      betAmount: price,
-      betAccountType: "DEMO",
-      botId: botId,
-      percent: price,
-    };
-    console.log(data);
-    axios
-      .post(waitLoseSignalUrl, data)
-      .then(function (response) {
-        //console.log(response);
-      })
-      .catch(function (error) {
-        //console.log(error);
-      });
+module.exports.sendApi4WaitLoseSignal = function (order, price, botId) {
+  let betType = null;
+  if (order === 0) {
+    betType = "UP";
+  } else if (order === 1) {
+    betType = "DOWN";
   }
+  let data = {
+    betType: betType,
+    betAmount: price,
+    betAccountType: "DEMO",
+    botId: botId,
+    percent: price,
+  };
+  console.log(data);
+  axios
+    .post(waitLoseSignalUrl, data)
+    .then(function (response) {
+      //console.log(response);
+    })
+    .catch(function (error) {
+      //console.log(error);
+    });
+}
+
+const waitLoseSignalCheck = "http://localhost:5555/api/trade/v1/waitLoseSignalSession";
+module.exports.sendApi4WaitLoseSignalCheck = function (sessionNumber, createdTime, botId, sessionLoseNum) {
+
+  let data = {
+    sessionNumber: sessionNumber,
+    botId: botId,
+    createdTime: createdTime,
+    sessionLoseNum: sessionLoseNum
+  };
+  axios
+    .post(waitLoseSignalCheck, data)
+    .then(function (response) {
+      //console.log(response);
+    })
+    .catch(function (error) {
+      //console.log(error);
+    });
+}
