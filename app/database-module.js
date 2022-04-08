@@ -6,8 +6,8 @@ const api = require('./server');
 var connection = mysql.createConnection({
     host: '127.0.0.1',
     user: 'root',
-    //password: '1234',
-    password: 'aA123456789^Aa@',
+    password: '1234',
+    //password: 'aA123456789^Aa@',
     database: 'tradding_db'
 });
 
