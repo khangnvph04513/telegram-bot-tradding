@@ -6,8 +6,8 @@ const api = require('./server');
 var connection = mysql.createConnection({
     host: '127.0.0.1',
     user: 'root',
-    password: '1234',
-    //password: 'aA123456789^Aa@',
+    //password: '1234',
+    password: 'aA123456789^Aa@',
     database: 'tradding_db'
 });
 
@@ -57,7 +57,6 @@ module.exports.getLastDataTraddingByLimit = function (limit) {
 // Lấy số dư hiện tại
 module.exports.getBotInfo = function (botId) {
     return new Promise((resolve, reject) => {
-        console.log(`select * from bot where id=${botId}`);
         connection.query(`select * from bot where id=${botId}`, function (err, result, fields) {
             if (err) reject(err);
             if (result.length === 0) {
@@ -89,7 +88,6 @@ module.exports.insertToStatistics = function (botId, result, isQuickOrder, tradd
 }
 
 module.exports.insertToStatistics4KingAi = function (botId, result, isQuickOrder, traddingData, interest, percentInterest, isStatistics) {
-    console.log(`INSERT INTO statistics (result, bot_id, created_time, is_quick_order, tradding_data, interest, percent_interest, is_statistics) VALUES ('${result}', ${botId}, NOW(), ${isQuickOrder}, ${traddingData}, ${interest}, ${percentInterest}, ${isStatistics})`);
     return new Promise((resolve, reject) => {
         var sql = `INSERT INTO statistics (result, bot_id, created_time, is_quick_order, tradding_data, interest, percent_interest, is_statistics) VALUES ('${result}', ${botId}, NOW(), ${isQuickOrder}, ${traddingData}, ${interest}, ${percentInterest}, ${isStatistics})`;
         connection.query(sql, function (err, result) {
@@ -127,7 +125,6 @@ module.exports.getLastTraddingResult = function (botId) {
 
 module.exports.statistic = function (botId, timeAfter) {
     return new Promise((resolve, reject) => {
-        console.log(`select * from statistics where bot_id=${botId} and is_statistics=0 and result != 'NOT_ORDER' order by id desc limit ${timeAfter}`);
         connection.query(`select * from statistics where bot_id=${botId} and is_statistics=0  and result != 'NOT_ORDER' order by id desc limit ${timeAfter}`, function (err, result, fields) {
             if (err) reject(err);
             if (result.length >= timeAfter) {
@@ -154,7 +151,6 @@ module.exports.insertOrder = function (order, price, isQuickOrder, botId) {
         api.sendApiToCopyTrade(order, price, isQuickOrder, botId);
     }
     return new Promise((resolve, reject) => {
-        //console.log(`insert into orders(orders, price, is_quick_order, created_time, bot_id) values (${order}, ${price}, ${isQuickOrder}, NOW(), ${botId});`);
         connection.query(`insert into orders(orders, price, is_quick_order, created_time, bot_id) values (${order}, ${price}, ${isQuickOrder}, NOW(), ${botId})`, function (err, result, fields) {
             if (err) throw err;
             console.log("INSERT ORDER!");
@@ -192,9 +188,7 @@ module.exports.getOrder = function (botId) {
 
 module.exports.statisticDay = function (botId, timeAfter) {
     return new Promise((resolve, reject) => {
-        console.log(`select * from statistics where bot_id=${botId} and created_time >= CURDATE() and result!='NOT_ORDER' order by id DESC`);
         connection.query(`select * from statistics where bot_id=${botId} and created_time >= CURDATE() and result!='NOT_ORDER' order by id DESC`, function (err, result, fields) {
-            console.log(result.length);
             if (err) reject(err);
             let statisticTimeAfter = _.filter(result, ['is_statistics', 0]);
             if (statisticTimeAfter.length >= timeAfter) {
@@ -207,9 +201,7 @@ module.exports.statisticDay = function (botId, timeAfter) {
 
 module.exports.getStatistic = function (botId, timeAfter) {
     return new Promise((resolve, reject) => {
-        console.log(`select * from statistics where bot_id=${botId} and created_time >= CURDATE() and result!='NOT_ORDER' order by id DESC limit ${timeAfter}`);
         connection.query(`select * from statistics where bot_id=${botId} and result!='NOT_ORDER' order by id DESC limit ${timeAfter}`, function (err, result, fields) {
-            console.log(result.length);
             if (err) reject(err);
             resolve(result);
         });
@@ -218,7 +210,6 @@ module.exports.getStatistic = function (botId, timeAfter) {
 
 module.exports.getStatistic4KingAi = function (botId, timeAfter) {
     return new Promise((resolve, reject) => {
-        console.log(`select * from statistics where bot_id=${botId} and is_statistics != 0 and result!='NOT_ORDER' order by id DESC limit ${timeAfter}`);
         connection.query(`select * from statistics where bot_id=${botId} and is_statistics != 0 and result!='NOT_ORDER' order by id DESC limit ${timeAfter}`, function (err, result, fields) {
             console.log(result.length);
             if (err) reject(err);
@@ -256,7 +247,6 @@ module.exports.updateVolatiltyOfBot = function (botId, volatility) {
         connection.query(`update bot set session_volatility=${volatility} where id=${botId}`, function (err, result, fields) {
             if (err) throw err;
             resolve(result);
-            console.log("UPDATE VOLATILITY");
         });
     });
 }
@@ -266,14 +256,12 @@ module.exports.updateSessionNumAndResetCapital = function (botId, sessionNumber,
         connection.query(`update bot set session_num=${sessionNumber},budget = ${capital}  where id=${botId}`, function (err, result, fields) {
             if (err) throw err;
             resolve(result);
-            console.log("UPDATE VOLATILITY");
         });
     });
 }
 
 module.exports.getStatisticByLimit = function (botId, limit) {
     return new Promise((resolve, reject) => {
-        console.log(`select * from statistics where bot_id=${botId} order by id DESC limit ${limit}`);
         connection.query(`select * from statistics where bot_id=${botId} order by id DESC limit ${limit}`, function (err, result, fields) {
             console.log(result.length);
             if (err) reject(err);
@@ -285,7 +273,6 @@ module.exports.getStatisticByLimit = function (botId, limit) {
 
 module.exports.getLastOrder = function (botId) {
     return new Promise((resolve, reject) => {
-        console.log(`select * from orders where bot_id=${botId} order by id desc limit 1`);
         connection.query(`select * from orders where bot_id=${botId} order by id desc limit 1`, function (err, result, fields) {
             if (err) reject(err);
             if (result.length === 0) {
@@ -320,7 +307,6 @@ module.exports.clearDataOrders = function () {
 
 module.exports.clearData = function () {
     return new Promise((resolve, reject) => {
-        console.log(`Xóa kết quả`);
         connection.query(`delete from tradding_data`, function (err, result, fields) {
             if (err) throw err;
             resolve(result);
@@ -389,7 +375,6 @@ module.exports.getSettingByKey = function (key) {
 
 
 module.exports.updateSetting = function (key, value) {
-    console.log(`update setting set value='${value}' where config_key = '${key}'`);
     var sql = `update setting set value='${value}' where config_key = '${key}'`;
     connection.query(sql, function (err, result) {
         if (err) throw err;

@@ -11,7 +11,6 @@ const callApi = require(`../../server`)
 //bot.telegram.sendMessage(-516496456, message);
 // Link unicode của icon telegram : https://apps.timwhitlock.info/emoji/tables/unicode
 
-//const TELEGRAM_CHANNEL_ID = -1001546623891; // group test
 
 const botId = 23;
 const BOT_NAME = "KINGAI 1.7";
@@ -117,8 +116,12 @@ async function startBot() {
                 }
                 // Hòa
                 if (parseInt(result.result) === DRAW) {
-                    insertToStatistics4KingAi(dBbot, WIN, isQuickOrder, parseInt(result.result), interest, percent, STOP_SESSION_WIN);
-                    sendToTelegram(groupIds, `Kết quả lượt vừa rồi : Hòa \u{1F4B0} \n\u{1F4B0}Số dư: ${budget}$ \n\u{1F4B0} Vốn: ${capital}$`);
+                    console.log(`CHECK HÒA`);
+                    if (isQuickOrder === QUICK_ORDER) {
+                        orderPrice = orderPrice / 2;
+                    }
+                    insertToStatistics4KingAi(dBbot, WIN, isQuickOrder, parseInt(result.result), interest, percent, NOT_STOP_SESSION);
+                    sendToTelegram(groupIds, `Kết quả lượt vừa rồi : Hòa \u{1F4B0} \n\u{1F4B0}Số dư: ${budget}$ \n\u{1F4B0} Vốn: ${CAPITAL}$`);
                     return;
                 }
                 // THẮNG
@@ -149,10 +152,8 @@ async function startBot() {
                     sendToTelegram(groupIds, `Kết quả lượt vừa rồi : Thua \u{274C} \n\u{1F4B0}Số dư: ${budget}$ \n\u{1F4B0}Lãi : ${interest}$ (${percent}%)\n\u{1F4B0}Vốn: ${CAPITAL}$`);
                     updateBugget(botId, budget);
                     
-                    console.log(`numQuickOrder ${numQuickOrder}`);
                     if (numQuickOrder === STOP_QUICK) {
                         putStatistics(dBbot, groupIds);
-                        console.log(`CHOOTS PHIEN`);
                         insertToStatistics4KingAi(dBbot, LOSE, isQuickOrder, parseInt(result.result), interest, percent, STOP_SESSION_LOSE);
                         numQuickOrder = 0; // Chốt phiên
                         isQuickOrder = NON_QUICK_ORDER;
@@ -185,7 +186,6 @@ async function getCronTimeInfo() {
 }
 
 async function putStatistics(dBbot, groupIds) {
-    console.log(dBbot);
     let statisticalsTimeAfterStr = [];
     let sessionNumber = dBbot.session_num;
     sessionNumber++;
@@ -195,13 +195,11 @@ async function putStatistics(dBbot, groupIds) {
     }
     let index = sessionNumber - limitStatistics;
     await updateSessionNumAndResetCapital(dBbot.id, sessionNumber, CAPITAL);
-    console.log(`TEST ${limitStatistics}`);
     let statisticsMsg = [];
     statisticsMsg.push(`\u{267B} Tổng hợp ${limitStatistics} phiên gần nhất:\n`);
     let statisc = await getStatistic(dBbot.id, limitStatistics);
     statisc = statisc.reverse();
     if (!statisc) {
-        console.log(`STOP thống kê `);
         return;
     }
     statisc.forEach(e => {
@@ -273,7 +271,6 @@ async function statistic(botid, timeAfter) {
 }
 
 async function getStatistic(botid, timeAfter) {
-    console.log(`TEST GET STATISTICS`);
     return await database.getStatistic4KingAi(botid, timeAfter);
 }
 
@@ -299,7 +296,6 @@ function isValidLastResult(lastStatistics) {
     if (currentHour !== createdHour) {
         return false;
     }
-    console.log(currentMinute - createdMinute);
     if (currentMinute - createdMinute > 2) {
         return false;
     }

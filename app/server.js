@@ -74,7 +74,6 @@ module.exports.sendApi4WaitLoseSignal = function (order, price, botId) {
     botId: botId,
     percent: price,
   };
-  console.log(data);
   axios
     .post(waitLoseSignalUrl, data)
     .then(function (response) {
@@ -101,5 +100,16 @@ module.exports.sendApi4WaitLoseSignalCheck = function (sessionNumber, createdTim
     })
     .catch(function (error) {
       //console.log(error);
+    });
+}
+
+const updateBalanceUrl = "http://localhost:5555/api/trade/v1/updateBalance";
+module.exports.updateBalance = function () {
+  axios
+    .post(updateBalanceUrl)
+    .then(function (response) {
+    })
+    .catch(function (error) {
+      console.log(error);
     });
 }

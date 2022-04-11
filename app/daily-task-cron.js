@@ -16,6 +16,7 @@ const job = new cron.CronJob({
         initKingAiBot(21);
         initKingAiBot(22);
         initKingAiBot(23);
+        initKingAiBot(4);
     },
     start: true,
     timeZone: 'Asia/Ho_Chi_Minh' // Lưu ý set lại time zone cho đúng 
@@ -29,24 +30,18 @@ const jobRestart = new cron.CronJob({
             console.log('Exit code:', code);
             console.log('Program output:', output);
         });
+
+        await sleep(30000);
+        shell.exec('pm2 restart app', function (code, output) {
+            console.log('Exit code:', code);
+            console.log('Program output:', output);
+        });
     },
     start: true,
     timeZone: 'Asia/Ho_Chi_Minh' // Lưu ý set lại time zone cho đúng 
 });
 jobRestart.start();
 
-// ========================== VOLUME ========================
-async function startTradeVolume() {
-    let timeInfo = await getCronTimeInfo();
-    const jobTradeVolume = new cron.CronJob({
-        cronTime: timeInfo.cronTab,
-        onTick: async function () {
-            api.sendApiToTradeVolume();
-        }
-    });
-    jobTradeVolume.start();
-}
-startTradeVolume();
 
 async function medthodChecking() {
     let timeInfo = await getTimeStatisticsInfo();
@@ -55,7 +50,7 @@ async function medthodChecking() {
         onTick: async function () {
             let currentTimeSecond = new Date().getSeconds();
             console.log("start");
-            api.checkWaitLose();
+            api.updateBalance();
         }
     });
     botConfigCron.start();
@@ -121,7 +116,7 @@ async function getTimeStatisticsInfo() {
 
 async function checkTraddingData() {
     const traddingDataCheckingCron = new cron.CronJob({
-        cronTime: "0 */5 * * * *",
+        cronTime: "0 */15 * * * *",
         onTick: async function () {
             let currentTimeSecond = new Date().getSeconds();
             console.log("CHECK RESTART TRADDING-DATA");
@@ -177,6 +172,7 @@ resetCapital4KingAi(20);
 resetCapital4KingAi(21);
 resetCapital4KingAi(22);
 resetCapital4KingAi(23);
+resetCapital4KingAi(4);
 async function initKingAiBot(botId) {
     if (botId === 19) { // bot 1.4
         return await database.initBotKingAiBot(botId, 15);
@@ -192,6 +188,9 @@ async function initKingAiBot(botId) {
         return await database.initBotKingAiBot(botId, 127);
     }
     else if (botId === 8) {
+        return await database.initBotKingAiBot(botId, 31);
+    }
+    else if (botId === 4) {
         return await database.initBotKingAiBot(botId, 31);
     }
 
@@ -213,6 +212,9 @@ async function resetCapital4KingAi(botId) {
         return await database.resetCapital4KingAi(botId, 127);
     }
     else if (botId === 8) {
+        return await database.resetCapital4KingAi(botId, 31);
+    }
+    else if (botId === 4) {
         return await database.resetCapital4KingAi(botId, 31);
     }
 

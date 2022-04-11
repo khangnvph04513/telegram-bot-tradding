@@ -5,8 +5,8 @@ const cron = require('cron');
 var shell = require('shelljs');
 const readFileSync = require('fs');
 
-let capchaApi = JSON.parse(readFileSync.readFileSync('E:/Project/telegram-bot-tradding/capcha-api.json', 'utf-8'));
-//let capchaApi = JSON.parse(readFileSync.readFileSync('/home/capcha-api.json', 'utf-8'));
+//let capchaApi = JSON.parse(readFileSync.readFileSync('E:/Project/telegram-bot-tradding/capcha-api.json', 'utf-8'));
+let capchaApi = JSON.parse(readFileSync.readFileSync('/home/capcha-api.json', 'utf-8'));
 
 const RecaptchaPlugin = require('puppeteer-extra-plugin-recaptcha');
 const { connect, ConsoleMessage } = require('puppeteer');
@@ -32,10 +32,10 @@ puppeteer.launch({ headless: true, args: ['--no-sandbox'] }).then(async browser 
     const page = await browser.newPage()
     await page.setDefaultNavigationTimeout(0);
     await page.goto('https://bitiva1.net/login')
-    // await page.type('input[name="email"]', 'gunh39683@gmail.com', { delay: 100 })
-    // await page.type('input[name="password"]', '123456', { delay: 100 })
-    await page.type('input[name="email"]', 'khangnvph045132@gmail.com', { delay: 100 })
-    await page.type('input[name="password"]', '123@123Aa', { delay: 100 })
+    await page.type('input[name="email"]', 'gunh39683@gmail.com', { delay: 100 })
+    await page.type('input[name="password"]', '123456', { delay: 100 })
+    // await page.type('input[name="email"]', 'khangnvph045132@gmail.com', { delay: 100 })
+    // await page.type('input[name="password"]', '123@123Aa', { delay: 100 })
     await page.click('#main-content > div > div > div > div.boxAuthentication.show > div > div.formWapper.w-100 > form > div.form-group.text-center > button')
 
     // That's it, a single line of code to solve reCAPTCHAs 🎉
@@ -88,6 +88,7 @@ puppeteer.launch({ headless: true, args: ['--no-sandbox'] }).then(async browser 
                 } else {
                     result = `Kết quả bóng vừa rồi : Hòa`
                     lastResult = 2;
+                    console.log(`CHECK ressult ${finalSide}`);
                 }
                 await database.inserRessult(lastResult);
                 if (isBetSession) {
