@@ -17,6 +17,7 @@ const STOPPING_STATUS = 0;
 const capital = 100;
 const WIN = "WIN";
 const LOSE = "LOSE";
+const REFUND = "REFUND";
 const NOT_ORDER = "NOT_ORDER";
 const STATISTIC_TIME_AFTER = 10;
 const NON_QUICK_ORDER = 0;
@@ -119,7 +120,7 @@ async function startBot() {
                     if (isQuickOrder === QUICK_ORDER) {
                         orderPrice = orderPrice / 2;
                     }
-                    insertToStatistics4KingAi(dBbot, WIN, isQuickOrder, parseInt(result.result), interest, percent, NOT_STOP_SESSION);
+                    insertToStatistics4KingAi(dBbot, REFUND, isQuickOrder, parseInt(result.result), 0, 0, NOT_STOP_SESSION);
                     sendToTelegram(groupIds, `Kết quả lượt vừa rồi : Hòa \u{1F4B0} \n\u{1F4B0}Số dư: ${budget}$ \n\u{1F4B0} Vốn: ${CAPITAL}$`);
                     return;
                 }
