@@ -4,21 +4,14 @@ const bot = require('./telegram-module');
 const database = require('../database-module');
 var moment = require('moment');
 const callApi = require(`../server`)
-
-
-// var message = "\u{1F600} Cho bot gửi thử ký tự đặc biệt và xuống dòng \n \u{1F359} Cho bot gửi thử ký tự đặc biệt và xuống dòng \n \u{2B06} Cho bot gửi thử ký tự đặc biệt và xuống dòng \n \u{2B07} Cho bot gửi thử ký tự đặc biệt và xuống dòng \n"
-// message += "\u{1F55D} Đồng hồ, \u{2B06}  Tăng , \u{2B07} Giảm ,\u{1F389} Thắng , \u{274C} Thua , \u{267B} Thống kê, \u{1F4B0} Tiền";
-//bot.telegram.sendMessage(-516496456, message);
-// Link unicode của icon telegram : https://apps.timwhitlock.info/emoji/tables/unicode
-
-//const TELEGRAM_CHANNEL_ID = -1001546623891; // group test
-
+//const TELEGRAM_CHANNEL_ID = -1001787581503;
 const botId = 4;
 const BOT_NAME = "Nối bóng";
 const STOPPING_STATUS = 0;
 const capital = 100;
 const WIN = "WIN";
 const LOSE = "LOSE";
+const REFUND = "REFUND";
 const NOT_ORDER = "NOT_ORDER";
 const STATISTIC_TIME_AFTER = 10;
 const NON_QUICK_ORDER = 0;
@@ -28,15 +21,15 @@ const STOP_SESSION_LOSE = 2;
 const NOT_STOP_SESSION = 0;
 const BUY = 0;
 const SELL = 1;
-const DRAW = 'DRAW';
+const DRAW = 2;
 const CAPITAL = 31;
-//const TELEGRAM_CHANNEL_ID = -1001676896094;
 const TELEGRAM_CHANNEL_ID = -1001546623891;
+//const TELEGRAM_CHANNEL_ID = -1001787581503;
 let numQuickOrder = 0;
 let isQuickOrder = NON_QUICK_ORDER;
 var isSentMessage = false;
 let orderPrice = 1;
-const STOP_QUICK = 4;
+const STOP_QUICK = 2;
 let isStop = false;
 let isLose= false;
 const SESSION_LOSE_NUM = STOP_QUICK + 1;
@@ -123,8 +116,11 @@ async function startBot() {
                 }
                 // Hòa
                 if (parseInt(result.result) === DRAW) {
-                    console.log(`TEST 1`);
-                    insertToStatistics4KingAi(dBbot, WIN, isQuickOrder, parseInt(result.result), interest, percent, NOT_STOP_SESSION);
+                    console.log(`CHECK HÒA`);
+                    if (isQuickOrder === QUICK_ORDER) {
+                        orderPrice = orderPrice / 2;
+                    }
+                    insertToStatistics4KingAi(dBbot, REFUND, isQuickOrder, parseInt(result.result), 0, 0, NOT_STOP_SESSION);
                     sendToTelegram(groupIds, `Kết quả lượt vừa rồi : Hòa \u{1F4B0} \n\u{1F4B0}Số dư: ${budget}$ \n\u{1F4B0} Vốn: ${capital}$`);
                     return;
                 }

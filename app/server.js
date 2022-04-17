@@ -24,18 +24,6 @@ module.exports.sendApiToCopyTrade = function (order, price, isQuickOrder, botId)
     });
 }
 
-const urlCheckWaitLose = "http://localhost:5555/api/trade/v1/method-setting";
-module.exports.checkWaitLose = function () {
-  axios
-    .post(urlCheckWaitLose)
-    .then(function (response) {
-
-    })
-    .catch(function (error) {
-      console.log(error);
-    });
-}
-
 const urlTradeVolume = "http://localhost:5555/api/trade/v1/volume-bet";
 module.exports.sendApiToTradeVolume = function () {
   axios

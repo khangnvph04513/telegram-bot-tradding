@@ -119,7 +119,6 @@ async function checkTraddingData() {
         cronTime: "0 */15 * * * *",
         onTick: async function () {
             let currentTimeSecond = new Date().getSeconds();
-            console.log("CHECK RESTART TRADDING-DATA");
             const lastResult = await getLastDataTradding();
             console.log(lastResult);
             if (!lastResult) {
