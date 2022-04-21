@@ -17,6 +17,11 @@ const job = new cron.CronJob({
         initKingAiBot(22);
         initKingAiBot(23);
         initKingAiBot(4);
+        initKingAiBot(9);
+        initKingAiBot(10);
+        initKingAiBot(17);
+        initKingAiBot(18);
+        
     },
     start: true,
     timeZone: 'Asia/Ho_Chi_Minh' // Lưu ý set lại time zone cho đúng 
@@ -172,6 +177,10 @@ resetCapital4KingAi(21);
 resetCapital4KingAi(22);
 resetCapital4KingAi(23);
 resetCapital4KingAi(4);
+resetCapital4KingAi(9);
+resetCapital4KingAi(10);
+resetCapital4KingAi(17);
+resetCapital4KingAi(18);
 async function initKingAiBot(botId) {
     if (botId === 19) { // bot 1.4
         return await database.initBotKingAiBot(botId, 15);
@@ -190,6 +199,18 @@ async function initKingAiBot(botId) {
         return await database.initBotKingAiBot(botId, 31);
     }
     else if (botId === 4) {
+        return await database.initBotKingAiBot(botId, 31);
+    }
+    else if (botId === 9) {
+        return await database.initBotKingAiBot(botId, 31);
+    }
+    else if (botId === 10) {
+        return await database.initBotKingAiBot(botId, 31);
+    }
+    else if (botId === 18) {
+        return await database.initBotKingAiBot(botId, 31);
+    }
+    else if (botId === 17) {
         return await database.initBotKingAiBot(botId, 31);
     }
 
@@ -214,6 +235,18 @@ async function resetCapital4KingAi(botId) {
         return await database.resetCapital4KingAi(botId, 31);
     }
     else if (botId === 4) {
+        return await database.resetCapital4KingAi(botId, 31);
+    }
+    else if (botId === 9) {
+        return await database.resetCapital4KingAi(botId, 31);
+    }
+    else if (botId === 10) {
+        return await database.resetCapital4KingAi(botId, 31);
+    }
+    else if (botId === 17) {
+        return await database.resetCapital4KingAi(botId, 31);
+    }
+    else if (botId === 18) {
         return await database.resetCapital4KingAi(botId, 31);
     }
 

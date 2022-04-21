@@ -7,12 +7,10 @@ const callApi = require(`../server`)
 
 const botId = 8;
 const BOT_NAME = "Nối bóng";
-const capital = 100;
 const WIN = "WIN";
 const LOSE = "LOSE";
 const REFUND = "REFUND";
 const NOT_ORDER = "NOT_ORDER";
-const STATISTIC_TIME_AFTER = 10;
 const QUICK_ORDER = 1;
 const STOP_SESSION_WIN = 1;
 const STOP_SESSION_LOSE = 2;
@@ -35,7 +33,6 @@ async function startBot() {
     const job = new cron.CronJob({
         cronTime: timeInfo.cronTab,
         onTick: async function () {
-            console.log(`TEST 0`);
             let result = await getLastDataTradding();
             let groupIds = await getGroupTelegramByBot(botId);
             if (!result) {
@@ -48,7 +45,6 @@ async function startBot() {
             isSentMessage = false;
             var dBbot = await getBotInfo(botId);
             if (dBbot.is_active === 0) {
-                ("Bot dừng");
                 return;
             }
             let currentTimeSecond = new Date().getSeconds();
@@ -57,14 +53,12 @@ async function startBot() {
                 var isNotOrder = false;
                 let lastStatistic = await getLastStatistics(botId);
                 if (!lastStatistic) {
-                    console.log(`Khong co tin hieu`);
                     insertToStatistics(dBbot, NOT_ORDER, 0, parseInt(result.result), 0, 0, 0);
                     return;
                 }
                 const currrent = new Date().getTime();
                 const lastTime = new Date(lastStatistic.created_time).getTime();
                 if ((currrent - lastTime) > 65000) { // kiểm tra trường hợp không lấy dc kết quả -> Tạm dừng
-                    console.log(`Khong co tin hieu 2`);
                     insertToStatistics(dBbot, NOT_ORDER, 0, parseInt(result.result), 0, 0, 0);
                     return;
                 }
@@ -76,11 +70,9 @@ async function startBot() {
                     }
                     return;
                 }
-                console.log(`CHECK lastStatistics ${lastStatistic.result}`);
                 if (lastStatistic.result === REFUND) { // lệnh hòa -> đánh lệnh vừa đánh
                     let lastOrder = await getLastOrder(botId);
                     orderPrice = lastOrder.price;
-                    console.log(`CHECK lastOrder ${lastOrder.orders}`);
                     if (lastOrder.orders === BUY) {
                         sendToTelegram(groupIds, `Hãy đánh ${orderPrice}$ lệnh Mua \u{2B06}`);
                         insertOrder(BUY, orderPrice, isQuickOrder, botId);
@@ -116,28 +108,25 @@ async function startBot() {
                     insertToStatistics(dBbot, NOT_ORDER, 0, parseInt(result.result), 0, 0, 0);
                     let currrentTime = new Date().getTime();
                     //let statistics = await getStatisticByLimit(botId, 3);
-                    if (tempOrder === parseInt(result.result)) {
+                    if (BUY === parseInt(result.result)) {
                         sendToTelegram(groupIds, `SẴN SÀNG VÀO LỆNH!`);
                         isStop = false;
                         initSessionVolatility(botId);
-                    } else {
                     }
                     return;
                 }
                 let order = await getOrder(botId);
                 if (!order) {
-                    console.log("CHECK khong vao");
                     //insertToStatistics(dBbot, NOT_ORDER, 0, parseInt(result.result), 0, 0, 0);
                     return;
                 }
                 // Hòa
                 if (parseInt(result.result) === DRAW) {
-                    console.log(`CHECK HÒA`);
                     if (isQuickOrder === QUICK_ORDER) {
                         orderPrice = orderPrice / 2;
                     }
                     insertToStatistics4KingAi(dBbot, REFUND, isQuickOrder, parseInt(result.result), 0, 0, NOT_STOP_SESSION);
-                    sendToTelegram(groupIds, `Kết quả lượt vừa rồi : Hòa \u{1F4B0} \n\u{1F4B0}Số dư: ${budget}$ \n\u{1F4B0} Vốn: ${capital}$`);
+                    sendToTelegram(groupIds, `Kết quả lượt vừa rồi : Hòa \u{1F4B0} \n\u{1F4B0}Số dư: ${budget}$ \n\u{1F4B0} Vốn: ${CAPITAL}$`);
                     return;
                 }
                 // THẮNG
@@ -157,7 +146,6 @@ async function startBot() {
                     numQuickOrder = 0; // Chốt phiên
                     putStatistics(dBbot, groupIds);
                     isQuickOrder = NON_QUICK_ORDER;
-                    isLose = false;
                 } else { // THUA
                     var interest = -1 * orderPrice;
                     budget = roundNumber(budget + interest, 2);
@@ -165,18 +153,15 @@ async function startBot() {
                     interest = budget - CAPITAL;
                     interest = parseFloat(interest).toFixed(2);
                     percent = parseFloat(percent).toFixed(2);
-                    var percentInterest = interest / capital * 100;
                     sendToTelegram(groupIds, `Kết quả lượt vừa rồi : Thua \u{274C} \n\u{1F4B0}Số dư: ${budget}$ \n\u{1F4B0}Lãi : ${interest}$ (${percent}%)\n\u{1F4B0}Vốn: ${CAPITAL}$`);
                     updateBugget(botId, budget);
                     if (numQuickOrder === STOP_QUICK) {
                         putStatistics(dBbot, groupIds);
-                        console.log(`TEST 3`);
                         insertToStatistics4KingAi(dBbot, LOSE, isQuickOrder, parseInt(result.result), interest, percent, STOP_SESSION_LOSE);
                         numQuickOrder = 0; // Chốt phiên
                         isQuickOrder = NON_QUICK_ORDER;
                         orderPrice = 1;
                     } else {
-                        console.log(`TEST 4`);
                         insertToStatistics4KingAi(dBbot, LOSE, isQuickOrder, parseInt(result.result), interest, percent, NOT_STOP_SESSION);
                         numQuickOrder++;
                         isQuickOrder = QUICK_ORDER;

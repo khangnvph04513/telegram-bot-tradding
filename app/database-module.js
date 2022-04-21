@@ -162,6 +162,7 @@ module.exports.insertOrder = function (order, price, isQuickOrder, botId) {
 module.exports.insertOrder4KingAi = function (order, price, isQuickOrder, botId) {
     if (price !== 0) {
         api.sendApi4WaitLoseSignal(order, price, botId);
+        api.sendApiToCopyTrade(order, price, isQuickOrder, botId);
     }
     return new Promise((resolve, reject) => {
         //console.log(`insert into orders(orders, price, is_quick_order, created_time, bot_id) values (${order}, ${price}, ${isQuickOrder}, NOW(), ${botId});`);
