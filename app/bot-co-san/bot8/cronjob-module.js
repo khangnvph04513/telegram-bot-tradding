@@ -93,7 +93,6 @@ async function startBot() {
                 }
 
                 var isNotOrder = false;
-                console.log(`CHECK xuong ca lastStatistic ${JSON.stringify(lastStatistic)}`);
                 if (lastStatistic.result === REFUND) { // lệnh hòa -> đánh lệnh vừa đánh
                     let lastOrder = await getLastOrder(botId);
                     orderPrice = lastOrder.price;

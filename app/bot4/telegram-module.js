@@ -1,6 +1,6 @@
 const { Telegraf } = require('telegraf');
 
-const bot = new Telegraf('5121570335:AAFlYd78ADyM40ELlY29mDzXbQhgf_Q1ViA');
+const bot = new Telegraf('5121570335:AAFdWsXBnpEktJ3xDFwSfTDWyptg2HewcLg');
 //const bot = new Telegraf('1977842671:AAGJf6GW3pZ7SAaOu2oMeN7KHCJkUx8GGrM');
 
 // 1988197681:AAHK5okW0zGFMV_3KlP1cwJRBRhoUK5D8Dk bot get id

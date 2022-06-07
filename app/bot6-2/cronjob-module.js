@@ -79,7 +79,7 @@ async function startBot() {
                     orderPrice = lastOrder.price;
                     console.log(`CHECK lastOrder ${lastOrder.orders}`);
                     if (lastOrder.orders === SELL) {
-                        sendToTelegram(groupIds, `Hãy đánh ${orderPrice}$ lệnh Bán \u{2B06}`);
+                        sendToTelegram(groupIds, `Hãy đánh ${orderPrice}$ lệnh Bán \u{2B07}`);
                         insertOrder(SELL, orderPrice, isQuickOrder, botId);
                     } else {
                         isNotOrder = true;
@@ -93,7 +93,7 @@ async function startBot() {
                 if (isQuickOrder === QUICK_ORDER) {
                     orderPrice = orderPrice * 2;
                 }
-                sendToTelegram(groupIds, `Hãy đánh ${orderPrice}$ lệnh Bán \u{2B06}`);
+                sendToTelegram(groupIds, `Hãy đánh ${orderPrice}$ lệnh Bán \u{2B07}`);
                 insertOrder(SELL, orderPrice, isQuickOrder, botId);
                 if (!isNotOrder) {
                     sendToTelegram(groupIds, `Chờ kết quả \u{1F55D} !`);
