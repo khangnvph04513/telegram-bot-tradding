@@ -44,7 +44,7 @@ module.exports.sendApiBotSetting = function () {
       //console.log(response);
     })
     .catch(function (error) {
-      console.log(error);
+      //console.log(error);
     });
 }
 const waitLoseSignalUrl = "http://localhost:5555/api/trade/v1/waitLoseSignalBet";
@@ -98,6 +98,6 @@ module.exports.updateBalance = function () {
     .then(function (response) {
     })
     .catch(function (error) {
-      console.log(error);
+      //console.log(error);
     });
 }

@@ -10,18 +10,14 @@ const job = new cron.CronJob({
         clearDataOrders();
         clearData();
         initBot();
-        initKingAiBot(19);
         initKingAiBot(8);
         initKingAiBot(20);
-        initKingAiBot(21);
-        initKingAiBot(22);
-        initKingAiBot(23);
         initKingAiBot(4);
         initKingAiBot(9);
         initKingAiBot(10);
         initKingAiBot(17);
         initKingAiBot(18);
-        
+
     },
     start: true,
     timeZone: 'Asia/Ho_Chi_Minh' // Lưu ý set lại time zone cho đúng 
@@ -54,7 +50,6 @@ async function medthodChecking() {
         cronTime: timeInfo.cronTab,
         onTick: async function () {
             let currentTimeSecond = new Date().getSeconds();
-            console.log("start");
             api.updateBalance();
         }
     });
@@ -67,7 +62,6 @@ async function bet4MixMethod() {
     const bet4MixMethodCron = new cron.CronJob({
         cronTime: timeInfo.cronTab,
         onTick: async function () {
-            console.log("start mix");
             api.sendApiBotSetting();
         }
     });
@@ -170,36 +164,22 @@ async function getData() {
     return await database.getLastResult();
 }
 
-resetCapital4KingAi(19);
 resetCapital4KingAi(8);
 resetCapital4KingAi(20);
-resetCapital4KingAi(21);
-resetCapital4KingAi(22);
-resetCapital4KingAi(23);
 resetCapital4KingAi(4);
 resetCapital4KingAi(9);
 resetCapital4KingAi(10);
 resetCapital4KingAi(17);
 resetCapital4KingAi(18);
+resetCapital4KingAi(26);
 async function initKingAiBot(botId) {
-    if (botId === 19) { // bot 1.4
-        return await database.initBotKingAiBot(botId, 15);
-    } else if (botId === 20) { // bot 1.5
+    if (botId === 20) { // bot 1.5
         return await database.initBotKingAiBot(botId, 31);
-    } else if (botId === 21) { // bot 1.3
-        return await database.initBotKingAiBot(botId, 7);
-    }
-    else if (botId === 22) {
-        return await database.initBotKingAiBot(botId, 63);
-    }
-    else if (botId === 23) {
-        return await database.initBotKingAiBot(botId, 127);
-    }
-    else if (botId === 8) {
+    } else if (botId === 8) {
         return await database.initBotKingAiBot(botId, 31);
     }
     else if (botId === 4) {
-        return await database.initBotKingAiBot(botId, 31);
+        //return await database.initBotKingAiBot(botId, 31);
     }
     else if (botId === 9) {
         return await database.initBotKingAiBot(botId, 31);
@@ -211,6 +191,9 @@ async function initKingAiBot(botId) {
         return await database.initBotKingAiBot(botId, 31);
     }
     else if (botId === 17) {
+        return await database.initBotKingAiBot(botId, 31);
+    }
+    else if (botId === 26) {
         return await database.initBotKingAiBot(botId, 31);
     }
 
@@ -218,24 +201,14 @@ async function initKingAiBot(botId) {
 }
 
 async function resetCapital4KingAi(botId) {
-    if (botId === 19) { // bot 1.4
-        return await database.resetCapital4KingAi(botId, 15);
-    } else if (botId === 20) { // bot 1.5
+    if (botId === 20) { // bot 1.5
         return await database.resetCapital4KingAi(botId, 31);
-    } else if (botId === 21) { // bot 1.3
-        return await database.resetCapital4KingAi(botId, 7);
-    }
-    else if (botId === 22) {
-        return await database.resetCapital4KingAi(botId, 63);
-    }
-    else if (botId === 23) {
-        return await database.resetCapital4KingAi(botId, 127);
     }
     else if (botId === 8) {
         return await database.resetCapital4KingAi(botId, 31);
     }
     else if (botId === 4) {
-        return await database.resetCapital4KingAi(botId, 31);
+        //return await database.resetCapital4KingAi(botId, 31);
     }
     else if (botId === 9) {
         return await database.resetCapital4KingAi(botId, 31);
@@ -247,6 +220,9 @@ async function resetCapital4KingAi(botId) {
         return await database.resetCapital4KingAi(botId, 31);
     }
     else if (botId === 18) {
+        return await database.resetCapital4KingAi(botId, 31);
+    }
+    else if (botId === 26) {
         return await database.resetCapital4KingAi(botId, 31);
     }
 

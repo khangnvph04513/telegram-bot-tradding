@@ -6,8 +6,8 @@ const api = require('./server');
 var connection = mysql.createConnection({
     host: '127.0.0.1',
     user: 'root',
-    //password: '1234',
-    password: 'aA123456789^Aa@',
+password: '1234',
+    //password: 'aA123456789^Aa@',
     database: 'tradding_db'
 });
 
@@ -178,7 +178,7 @@ module.exports.getOrder = function (botId) {
     return new Promise((resolve, reject) => {
         connection.query(`select * from orders where bot_id=${botId} order by id desc limit 1`, function (err, result, fields) {
             if (err) reject(err);
-            if (result.length === 0) {
+            if (!result || result.length === 0) {
                 //insertOrder(0, 0, 0, botId);
                 resolve(null);
             }
