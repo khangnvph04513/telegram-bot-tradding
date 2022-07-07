@@ -6,8 +6,8 @@ const api = require('./server');
 var connection = mysql.createConnection({
     host: '127.0.0.1',
     user: 'root',
-password: '1234',
-    //password: 'aA123456789^Aa@',
+//password: '1234',
+    password: 'aA123456789^Aa@',
     database: 'tradding_db'
 });
 
@@ -153,7 +153,6 @@ module.exports.insertOrder = function (order, price, isQuickOrder, botId) {
     return new Promise((resolve, reject) => {
         connection.query(`insert into orders(orders, price, is_quick_order, created_time, bot_id) values (${order}, ${price}, ${isQuickOrder}, NOW(), ${botId})`, function (err, result, fields) {
             if (err) throw err;
-            console.log("INSERT ORDER!");
             resolve(result);
         });
     });
@@ -168,7 +167,6 @@ module.exports.insertOrder4KingAi = function (order, price, isQuickOrder, botId)
         //console.log(`insert into orders(orders, price, is_quick_order, created_time, bot_id) values (${order}, ${price}, ${isQuickOrder}, NOW(), ${botId});`);
         connection.query(`insert into orders(orders, price, is_quick_order, created_time, bot_id) values (${order}, ${price}, ${isQuickOrder}, NOW(), ${botId})`, function (err, result, fields) {
             if (err) throw err;
-            console.log("INSERT ORDER!");
             resolve(result);
         });
     });

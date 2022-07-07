@@ -31,8 +31,8 @@ var isBetSession = true;
 puppeteer.launch({ headless: true, args: ['--no-sandbox'] }).then(async browser => {
     const page = await browser.newPage()
     await page.setDefaultNavigationTimeout(0);
-    await page.goto('https://moonata1.net/login')
-    await page.type('input[name="email"]', 'khangnvph045132@gmail.com', { delay: 100 })
+    await page.goto('https://bitiva2.net/login')
+    await page.type('input[name="email"]', 'na675108@gmail.com', { delay: 100 })
     await page.type('input[name="password"]', '123@123Aa', { delay: 100 })
     //await page.type('input[name="email"]', 'trumikoran@gmail.com', { delay: 100 })
     //await page.type('input[name="password"]', 'Trung12345678', { delay: 100 })

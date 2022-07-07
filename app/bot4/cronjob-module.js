@@ -15,9 +15,11 @@ const QUICK_ORDER = 1;
 const STOP_SESSION_WIN = 1;
 const STOP_SESSION_LOSE = 2;
 const NOT_STOP_SESSION = 0;
+const RUNNING_STATUS = 1;
 const BUY = 0;
 const SELL = 1;
 const DRAW = 2;
+const STOPPING_STATUS = 0;
 const CAPITAL = 31;
 const TELEGRAM_CHANNEL_ID = -1001787581503;
 let numQuickOrder = 0;
@@ -26,7 +28,6 @@ let isQuickOrder = NON_QUICK_ORDER;
 var isSentMessage = false;
 let orderPrice = 1;
 const STOP_QUICK = 4;
-let isStop = false;
 const SESSION_LOSE_NUM = STOP_QUICK + 1;
 async function startBot() {
     let timeInfo = await getCronTimeInfo();
@@ -62,13 +63,16 @@ async function startBot() {
                     insertToStatistics(dBbot, NOT_ORDER, 0, parseInt(result.result), 0, 0, 0);
                     return;
                 }
-                if (isStop) {
-                    if (lastStatistic.tradding_data === BUY) {
-                        tempOrder = BUY;
-                    } else if (lastStatistic.tradding_data === SELL) {
-                        tempOrder = SELL;
+                if (dBbot.is_running === STOPPING_STATUS) {
+                    let isReOrder = await isReOrder2();
+                    if (isReOrder) {
+                        sendToTelegram(groupIds, `SẴN SÀNG VÀO LỆNH`);
+                        await sleep(1000);
+                        stopOrStartBot(botId, RUNNING_STATUS);
+                    } else {
+                        return;
                     }
-                    return;
+
                 }
                 if (lastStatistic.result === REFUND) { // lệnh hòa -> đánh lệnh vừa đánh
                     let lastOrder = await getLastOrder(botId);
@@ -104,15 +108,8 @@ async function startBot() {
             }
             if (currentTimeSecond === parseInt(timeInfo.resultSecond) || currentTimeSecond === (parseInt(timeInfo.resultSecond) + 1) || currentTimeSecond === (parseInt(timeInfo.resultSecond) + 2)) { // Update kết quả, Thống kê
                 var budget = dBbot.budget;
-                if (isStop) {
+                if (dBbot.is_running === STOPPING_STATUS) {
                     insertToStatistics(dBbot, NOT_ORDER, 0, parseInt(result.result), 0, 0, 0);
-                    let currrentTime = new Date().getTime();
-                    //let statistics = await getStatisticByLimit(botId, 3);
-                    if (BUY === parseInt(result.result)) {
-                        sendToTelegram(groupIds, `SẴN SÀNG VÀO LỆNH!`);
-                        isStop = false;
-                        initSessionVolatility(botId);
-                    }
                     return;
                 }
                 let order = await getOrder(botId);
@@ -167,7 +164,7 @@ async function startBot() {
                         isQuickOrder = QUICK_ORDER;
                     }
                     if (numQuickOrder === 2) {
-                        isStop = true;
+                        await stopOrStartBot(botId, STOPPING_STATUS);
                         await sleep(2000);
                         sendToTelegram(groupIds, `Tạm dừng, chờ kết quả tiếp theo`);
                         stopTime = new Date().getTime();
@@ -191,6 +188,10 @@ async function getCronTimeInfo() {
     let resultSecond = await database.getSettingByKey(RESULT_SETTING_TIME_KEY);
     let cronTab = `${orderSecond.value},${resultSecond.value} * * * * *`;
     return { cronTab: cronTab, orderSecond: orderSecond.value, resultSecond: resultSecond.value }
+}
+
+async function stopOrStartBot(botId, isRunning) {
+    return await database.stopOrStartBot(botId, isRunning);
 }
 
 async function putStatistics(dBbot, groupIds) {
@@ -276,40 +277,14 @@ function roundNumber(num, scale) {
     }
 }
 
-async function statistic(botid, timeAfter) {
-    return await database.statistic(botid, timeAfter);
-}
-
 async function getStatistic(botid, timeAfter) {
     return await database.getStatistic4KingAi(botid, timeAfter);
 }
 
-// function formatDateFromISO(date) {
-
-//     return moment(date.toString()).format("hh:mm:ss");
-// }
 
 function formatDateFromISO(time, zone) {
     var format = 'HH:mm:ss';
     return moment(time, format).tz(zone).format(format);
-}
-
-
-// Kiểm tra xem có phải đúng kết quả cuối hay không, khoảng cách giữa thời điểm hiện tại k dc dài hơn 1 phút so với kết quả trước đó
-function isValidLastResult(lastStatistics) {
-    var currentHour = new Date().getHours();
-    var currentMinute = new Date().getMinutes();
-    var createdDate = new Date(lastStatistics.created_time);
-    var createdHour = createdDate.getHours();
-    var createdMinute = createdDate.getMinutes();
-
-    if (currentHour !== createdHour) {
-        return false;
-    }
-    if (currentMinute - createdMinute > 2) {
-        return false;
-    }
-    return true;
 }
 
 async function insertOrder(order, price, isQuickOrder, botId) {
@@ -334,31 +309,8 @@ async function updateVolatiltyOfBot(botId, volatility) {
 }
 
 
-async function getStatisticByLimit(botId, limit) {
-    return await database.getStatisticByLimit(botId, limit);
-}
-
 async function getLastOrder(botId) {
     return await database.getLastOrder(botId);
-}
-
-// điều kiện để tiếp tục đánh lệnh // limit =3 
-async function isReOrder(statistics) {
-    if (statistics[2].tradding_data === BUY && statistics[1].tradding_data === BUY) {
-        return true;
-    }
-    if (statistics[2].tradding_data === SELL && statistics[1].tradding_data === SELL) {
-        return true;
-    }
-
-    if (statistics[2].tradding_data === BUY && statistics[1].tradding_data === SELL && statistics[0].tradding_data === BUY) {
-        return true;
-    }
-
-    if (statistics[2].tradding_data === SELL && statistics[1].tradding_data === BUY && statistics[0].tradding_data === SELL) {
-        return true;
-    }
-    return false;
 }
 
 async function getLastDataTradding() {
@@ -387,6 +339,20 @@ async function sendToTelegram(groupIds, message) {
         }, 200 * i);
 
     });
+}
+async function getLastDataTraddingByLimit(limit) {
+    return await database.getLastDataTraddingByLimit(limit);
+}
+async function isReOrder2() {
+    let data = await getLastDataTraddingByLimit(3);
+    if (data.length < 3) {
+        return false;
+    }
+    if (data[0].result === data[2].result) {
+        return true;
+    }
+    return false;
+
 }
 
 
