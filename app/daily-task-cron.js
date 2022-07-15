@@ -179,7 +179,7 @@ async function initKingAiBot(botId) {
         return await database.initBotKingAiBot(botId, 31);
     }
     else if (botId === 4) {
-        //return await database.initBotKingAiBot(botId, 31);
+        return await database.initBotKingAiBot(botId, 31);
     }
     else if (botId === 9) {
         return await database.initBotKingAiBot(botId, 31);
@@ -194,6 +194,9 @@ async function initKingAiBot(botId) {
         return await database.initBotKingAiBot(botId, 31);
     }
     else if (botId === 26) {
+        return await database.initBotKingAiBot(botId, 31);
+    }
+    else if (botId === 27) {
         return await database.initBotKingAiBot(botId, 31);
     }
 
@@ -208,7 +211,7 @@ async function resetCapital4KingAi(botId) {
         return await database.resetCapital4KingAi(botId, 31);
     }
     else if (botId === 4) {
-        //return await database.resetCapital4KingAi(botId, 31);
+        return await database.resetCapital4KingAi(botId, 31);
     }
     else if (botId === 9) {
         return await database.resetCapital4KingAi(botId, 31);
@@ -223,6 +226,9 @@ async function resetCapital4KingAi(botId) {
         return await database.resetCapital4KingAi(botId, 31);
     }
     else if (botId === 26) {
+        return await database.resetCapital4KingAi(botId, 31);
+    }
+    else if (botId === 27) {
         return await database.resetCapital4KingAi(botId, 31);
     }
 
