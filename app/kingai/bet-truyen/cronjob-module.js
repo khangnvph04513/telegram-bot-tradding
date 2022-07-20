@@ -187,7 +187,7 @@ async function getBetOder() {
     if (parseInt(datas[4].result) === SELL && parseInt(datas[2].result) === BUY && parseInt(datas[0].result) === SELL) {
         return BUY
     }
-    return BUY;
+    return null;
 
 }
 
